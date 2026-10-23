@@ -1,0 +1,138 @@
+{
+  "description": "Project-scoped upstream skill snapshots; no CLI, hooks, remote services or application conversion engines installed. Not an exhaustive list of internet skills.",
+  "files": [
+    {
+      "path": ".agents/skills/graphify/SKILL.md",
+      "upstream": "https://github.com/Graphify-Labs/graphify",
+      "commit": "c588b72d936927790a87ad009955078ed40562a3",
+      "source_path": "graphify/skill-codex.md",
+      "sha256": "e1150326f0ed06db45e735ecb92b9d3048c9d165d61f61c5ecc728758a9c21f2"
+    },
+    {
+      "path": ".agents/skills/graphify/references/add-watch.md",
+      "upstream": "https://github.com/Graphify-Labs/graphify",
+      "commit": "c588b72d936927790a87ad009955078ed40562a3",
+      "source_path": "graphify/skills/codex/references/add-watch.md",
+      "sha256": "1e77351815547334c7e030f018dba513b303d397bf73d11fac47df03ace3b3f4"
+    },
+    {
+      "path": ".agents/skills/graphify/references/exports.md",
+      "upstream": "https://github.com/Graphify-Labs/graphify",
+      "commit": "c588b72d936927790a87ad009955078ed40562a3",
+      "source_path": "graphify/skills/codex/references/exports.md",
+      "sha256": "c39a2f8062be9a5ac319220d6e66ca586ed0b0798292b1321206834be74c1b33"
+    },
+    {
+      "path": ".agents/skills/graphify/references/extraction-spec.md",
+      "upstream": "https://github.com/Graphify-Labs/graphify",
+      "commit": "c588b72d936927790a87ad009955078ed40562a3",
+      "source_path": "graphify/skills/codex/references/extraction-spec.md",
+      "sha256": "e14c596c524ae8c41c796788af00ae9574ff7c5fe131ecbd2ca9def92a19a9cb"
+    },
+    {
+      "path": ".agents/skills/graphify/references/github-and-merge.md",
+      "upstream": "https://github.com/Graphify-Labs/graphify",
+      "commit": "c588b72d936927790a87ad009955078ed40562a3",
+      "source_path": "graphify/skills/codex/references/github-and-merge.md",
+      "sha256": "e5ebd90c7686f50363ff7a535556bc2f596d4c47ec1e6c8b95e11e36a0dfea2b"
+    },
+    {
+      "path": ".agents/skills/graphify/references/hooks.md",
+      "upstream": "https://github.com/Graphify-Labs/graphify",
+      "commit": "c588b72d936927790a87ad009955078ed40562a3",
+      "source_path": "graphify/skills/codex/references/hooks.md",
+      "sha256": "b9a4e9f66813c6fc720589f1071d1a03c95756ab7101447e14e57291fe7844e5"
+    },
+    {
+      "path": ".agents/skills/graphify/references/query.md",
+      "upstream": "https://github.com/Graphify-Labs/graphify",
+      "commit": "c588b72d936927790a87ad009955078ed40562a3",
+      "source_path": "graphify/skills/codex/references/query.md",
+      "sha256": "e99011beeff0cf40dc1775b1e0cd2eab0e5f950deeeb8353ae01cbe57adbff00"
+    },
+    {
+      "path": ".agents/skills/graphify/references/transcribe.md",
+      "upstream": "https://github.com/Graphify-Labs/graphify",
+      "commit": "c588b72d936927790a87ad009955078ed40562a3",
+      "source_path": "graphify/skills/codex/references/transcribe.md",
+      "sha256": "676a1e39aa6d43cdfcc416ec56616e36f7bad74066a82bd33a9485515b9a865c"
+    },
+    {
+      "path": ".agents/skills/graphify/references/update.md",
+      "upstream": "https://github.com/Graphify-Labs/graphify",
+      "commit": "c588b72d936927790a87ad009955078ed40562a3",
+      "source_path": "graphify/skills/codex/references/update.md",
+      "sha256": "c76b855ef9380d766b1a0b271b49bc7b40cf5b5b72558be1a021f99f9a9ea1cc"
+    },
+    {
+      "path": "third_party/licenses/graphify/LICENSE",
+      "upstream": "https://github.com/Graphify-Labs/graphify",
+      "commit": "c588b72d936927790a87ad009955078ed40562a3",
+      "source_path": "LICENSE",
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "third_party/licenses/graphify/LICENSE-MIT",
+      "upstream": "https://github.com/Graphify-Labs/graphify",
+      "commit": "c588b72d936927790a87ad009955078ed40562a3",
+      "source_path": "LICENSE-MIT",
+      "sha256": "36ecff6bbb97aca1be64e95f42538cf796adde5864edac583e620643c096931a"
+    },
+    {
+      "path": "third_party/licenses/graphify/NOTICE",
+      "upstream": "https://github.com/Graphify-Labs/graphify",
+      "commit": "c588b72d936927790a87ad009955078ed40562a3",
+      "source_path": "NOTICE",
+      "sha256": "3448ea175bba09f6fed8a743000139fb4c7112de83f164355b5540b158576621"
+    },
+    {
+      "path": ".agents/skills/ponytail/SKILL.md",
+      "upstream": "https://github.com/dietrichgebert/ponytail",
+      "commit": "09c434ab73ca43761c5d8b0c5d341926c2fba710",
+      "source_path": "skills/ponytail/SKILL.md",
+      "sha256": "9badd22a32e19cb884e46dfa8d3aae82bb81dfa5484105b8b4f0262df823a509"
+    },
+    {
+      "path": ".agents/skills/ponytail-audit/SKILL.md",
+      "upstream": "https://github.com/dietrichgebert/ponytail",
+      "commit": "09c434ab73ca43761c5d8b0c5d341926c2fba710",
+      "source_path": "skills/ponytail-audit/SKILL.md",
+      "sha256": "2b3223a02c386d1263e1b08343cb8eb3a53e444cdafb1d79e26c8ec2a8fcad28"
+    },
+    {
+      "path": ".agents/skills/ponytail-debt/SKILL.md",
+      "upstream": "https://github.com/dietrichgebert/ponytail",
+      "commit": "09c434ab73ca43761c5d8b0c5d341926c2fba710",
+      "source_path": "skills/ponytail-debt/SKILL.md",
+      "sha256": "b5ec2762f6ba8c4af9ea7173aa6c9f91b88655a25e43f9de0264f6ce8722b25f"
+    },
+    {
+      "path": ".agents/skills/ponytail-gain/SKILL.md",
+      "upstream": "https://github.com/dietrichgebert/ponytail",
+      "commit": "09c434ab73ca43761c5d8b0c5d341926c2fba710",
+      "source_path": "skills/ponytail-gain/SKILL.md",
+      "sha256": "231034a896d6762e4b5c8468287083422c56b499119976ec9f76821f7d083090"
+    },
+    {
+      "path": ".agents/skills/ponytail-help/SKILL.md",
+      "upstream": "https://github.com/dietrichgebert/ponytail",
+      "commit": "09c434ab73ca43761c5d8b0c5d341926c2fba710",
+      "source_path": "skills/ponytail-help/SKILL.md",
+      "sha256": "86ab0ce0af70cbeeeef499d5c884873b393f87f86401dcc45553662ce2c1eff9"
+    },
+    {
+      "path": ".agents/skills/ponytail-review/SKILL.md",
+      "upstream": "https://github.com/dietrichgebert/ponytail",
+      "commit": "09c434ab73ca43761c5d8b0c5d341926c2fba710",
+      "source_path": "skills/ponytail-review/SKILL.md",
+      "sha256": "33fe4ebe22a460924e5d4a261e223df22e409cc94ab76182bee9fb91a3ef022e"
+    },
+    {
+      "path": "third_party/licenses/ponytail/LICENSE",
+      "upstream": "https://github.com/dietrichgebert/ponytail",
+      "commit": "09c434ab73ca43761c5d8b0c5d341926c2fba710",
+      "source_path": "LICENSE",
+      "sha256": "fb1bc6909ac3ef82d5c22106e32ef682b0cff66788fa915fb9b53b15c9d2f3ab"
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "name": "converter-mce",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24.5"
+  },
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "dev:web": "vite --host 127.0.0.1",
+    "build:web": "vite build",
+    "build": "npm run typecheck && npm run build:web",
+    "typecheck": "tsc --noEmit",
+    "prepare:engine": "node scripts/prepare-engine.mjs",
+    "db:local": "wrangler d1 migrations apply DB --local",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "test:engine": "python3 scripts/test-engine.py",
+    "deploy": "node scripts/check-deploy.mjs && npm run prepare:engine && npm run build && wrangler deploy",
+    "android:debug": "node scripts/android-gradle.mjs"
+  },
+  "dependencies": {
+    "@cloudflare/containers": "0.3.7",
+    "jose": "6.2.13",
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-plugin": "1.4.7",
+    "@cloudflare/workers-types": "5.20261023.1",
+    "@playwright/test": "1.64.1",
+    "@types/node": "24.19.2",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitejs/plugin-react": "6.1.2",
+    "typescript": "5.9.3",
+    "vite": "8.3.5",
+    "vitest": "4.1.0",
+    "wrangler": "4.152.0"
+  }
+}
