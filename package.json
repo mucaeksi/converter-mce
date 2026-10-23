@@ -18,6 +18,7 @@
     "test:e2e": "playwright test",
     "test:engine": "python3 scripts/test-engine.py",
     "deploy": "node scripts/check-deploy.mjs && npm run prepare:engine && npm run build && wrangler deploy",
+    "deploy:web": "npm run build && wrangler deploy --config wrangler.web.jsonc",
     "android:debug": "node scripts/android-gradle.mjs"
   },
   "dependencies": {

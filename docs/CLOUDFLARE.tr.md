@@ -58,7 +58,17 @@ Reklamlar henüz etkin değildir. Kullanıcıdan ücret alınmaz; limitler ve ci
 içi işleme işlem maliyetini yönetir. Cloudflare hesap ve hizmet ücretleri gerçek
 hesapta kontrol edilir; reklam geliri sınırsız işlem garantisi olarak kullanılmaz.
 
-Canlı dağıtım için eksikler: Cloudflare API erişimi/hesap kimliği, gerçek
-D1/R2/Queue kaynakları, Access uygulaması ve hedef hostname; ardından canlı
-Container, dönüşüm, sahiplik, silme ve cron testi. Android reklam/izin akışı,
+23 Ekim 2026: token/hesap erişimi doğrulandı, D1/R2/Queue oluşturuldu; D1 şeması
+ve özel R2'nin bir günlük lifecycle kuralı uygulandı. Cihazda dönüşüm sürümü
+https://converter-mce.sosyalstudio-06a486e459d2.workers.dev adresinde yayında.
+`wrangler.web.jsonc` yalnızca ASSETS binding'iyle çalışır; sunucu API'si kapalıdır.
+Canlı mobil Chromium testi gerçek JPEG dönüşümü, piksel/boyut, indirme ve
+dosyanın sunucuya gönderilmediğini doğruladı.
+
+Cloudflare Containers erişimi Workers Paid planı gerektiği gerekçesiyle
+reddedildi. Aylık minimum 5 ABD dolarlık plan ve ek kullanım ücretleri kullanıcı
+onayı bekliyor; yeni abonelik satın alınmadı. Sonraki adımlar: ücretli plan,
+Access uygulaması, tam `wrangler.jsonc` dağıtımı; ardından canlı Container,
+dönüşüm, sahiplik, silme ve cron testi. Workers Builds kaynak bağlantısı da
+henüz kurulmadı. Android reklam/izin akışı,
 release imzası ve Play yayını ayrı sonraki teslimattır.

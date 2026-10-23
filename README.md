@@ -19,8 +19,17 @@ dönüştürme süreçleri Cloudflare üzerinde çalışacak şekilde hazırlanm
 
 Video, ses, PDF/Office, toplu işleme, reklam SDK'sı ve Android bulut girişi sonraki
 aşamalardır. Arayüzde henüz çalışmayan kategoriler “Yakında” olarak gösterilir.
-Hiçbir reklam/analitik SDK'sı veya ücretli plan etkin değildir. Canlı Cloudflare
-dağıtımı ve Play Store yayını yapılmış değildir.
+Hiçbir reklam/analitik SDK'sı veya bu proje için yeni ücretli plan etkin değildir.
+Play Store yayını yapılmadı.
+
+**Canlı web:** https://converter-mce.sosyalstudio-06a486e459d2.workers.dev
+
+23 Ekim 2026 itibarıyla cihazda görüntü dönüşümü yayında ve canlı Chromium
+testinden geçti. Bu dağıtım `wrangler.web.jsonc` kullanır; dosya yüklemez.
+Sunucu modu kapalıdır. D1/R2/Queue kaynakları hazırdır; Containers için hesapta
+Workers Paid gerekir: aylık en az 5 ABD doları, kullanım ücretleri eklenebilir.
+Plan satın alınmadı; sunucu dönüşümü için ayrıca Access kurulumu ve canlı motor
+testi yapılacaktır.
 
 ## Geliştirme ortamı
 
@@ -93,27 +102,26 @@ Playwright varsayılan olarak `/usr/bin/chromium` kullanır; farklı bir kurulum
 
 ## Cloudflare'a dağıtım
 
-Canlı hesap erişimi henüz sağlanmadı. `CLOUDFLARE_API_TOKEN` güvenli ortam
-ayarından, `CLOUDFLARE_ACCOUNT_ID` değişken olarak sağlanmalıdır. Token'ı Git'e,
+`CLOUDFLARE_API_TOKEN` ve `CLOUDFLARE_ACCOUNT_ID` Codex ortam ayarlarından
+sağlandı; hesap erişimi ve token'ın aktif olduğu doğrulandı. Token'ı Git'e,
 chat'e, `.dev.vars` içine veya komut argümanlarına kopyalamayın.
 
 Hesapta gerekli hizmetler: Workers/Containers/Durable Objects, D1, R2 ve Queues.
 Kullanıcı ücretsizliği Cloudflare faturası olmadığı anlamına gelmez; hesap planı,
-Containers kullanılabilirliği ve bütçe sınırları canlı kaynaklar açılmadan kontrol edilir.
+Containers kullanılabilirliği ve bütçe sınırları yeni ücretli plan açılmadan kontrol edilir.
 
-Hesap erişimi geldikten sonra:
+Bu hesapta aşağıdaki kaynaklar zaten oluşturuldu; tekrar oluşturmayın:
 
-```sh
-npx wrangler whoami
-npx wrangler d1 create converter-mce
-npx wrangler r2 bucket create converter-mce-files
-npx wrangler queues create converter-mce-jobs
-```
+- D1 `converter-mce`: gerçek kimliği `wrangler.jsonc` içinde; migration uygulandı.
+- R2 `converter-mce-files`: public erişim kapalı; `jobs/` için bir günlük nesne
+  silme ve yarım kalan multipart yüklemeleri sonlandırma kuralı doğrulandı.
+- Queue `converter-mce-jobs`: oluşturuldu; tam sunucu dağıtımına kadar tüketici yok.
 
-Dönen gerçek D1 kimliğini `wrangler.jsonc` içindeki `d1_databases[0].database_id`
-alanına yazın. R2 bucket'ı özel tutun; public erişim açmayın. İş dosyalarına ikinci
-bir temizlik güvencesi olarak R2 lifecycle politikası ekleyin. Henüz bu hesap
-komutları çalıştırılmış veya başarıyla doğrulanmış değildir.
+Yalnızca cihazda dönüşüm sunan mevcut yayını güncellemek için `npm run deploy:web`
+kullanın. Bu yapılandırma yalnızca statik varlıkları bağlar; sunucu API'si 503
+döndürür. Tam yapılandırmayla aynı Worker adını kullanır, dolayısıyla sunucu
+özellikleri etkinleştirildiğinde adres değişmez. Hesaptaki diğer proje kaynakları
+değiştirilmedi.
 
 İlk kontrollü bulut beta'sında kimlik Cloudflare Access ile doğrulanır. Uygulama
 host'unun `/api/*` yolları için Access uygulaması ve email OTP erişim politikası
@@ -129,17 +137,20 @@ npx wrangler d1 migrations apply DB --remote
 npm run deploy
 ```
 
-`deploy` kimlik/D1 önkoşullarını kontrol eder; imajı hazırlar ve build'i çalıştırır.
+`deploy` token/hesap/D1 önkoşullarını kontrol eder; imajı hazırlar ve build'i çalıştırır.
 Eksik erişimle kaynak oluşturduğunu veya deploy yaptığını iddia etmez. Dağıtımdan
 sonra gerçek Access girişi, bir dönüşüm, hesaplar arası erişim reddi, silme ve cron
 temizliği tekrar doğrulanmalıdır. `--dry-run` bu canlı kontrollerin yerine geçmez.
 
 Otomatik dağıtım için GitHub deposu Cloudflare Workers Builds'e bağlanır;
 Node sürümü 24.19.0, build komutu `npm ci && npm run prepare:engine && npm run build`,
-deploy komutu `npx wrangler deploy` olur. Container build desteği ve Docker bu
+deploy komutu tam sunucu sürümünde `npx wrangler deploy`, mevcut cihaz sürümünde
+`npx wrangler deploy --config wrangler.web.jsonc` olur. Container build desteği ve Docker bu
 hesabın build ortamında doğrulanmalıdır. GitHub Actions veya GitHub üzerinde
 çalışan uygulama servisi yoktur. Android release build/AAB ve R2 artefakt hattı
 ayrı bir Cloudflare build işi olarak sonraki aşamada kurulacaktır.
+Workers Builds GitHub bağlantısı henüz kurulmadı; mevcut yayın Codex'ten
+Wrangler ile doğrudan Cloudflare'a dağıtıldı.
 
 ## Kaynaklar
 

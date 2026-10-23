@@ -12,7 +12,7 @@
   },
   "vars": { "APP_ENV": "production" },
   "d1_databases": [{
-    "binding": "DB",
+    "binding": "DB", "database_id": "3eafceff-08be-482a-b0d1-3902e0372d55",
     "database_name": "converter-mce",
     "migrations_dir": "migrations"
   }],
