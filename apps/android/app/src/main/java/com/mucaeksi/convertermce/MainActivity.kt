@@ -24,13 +24,26 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             MaterialTheme(colorScheme = lightColorScheme(primary = Color(0xFF174E43), background = Color(0xFFF7F8F5))) {
-                Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) { Converter() }
+                Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+                    var tool by remember { mutableStateOf("image") }
+                    var processing by remember { mutableStateOf(false) }
+                    Column(Modifier.safeDrawingPadding()) {
+                        Row(Modifier.padding(horizontal = 24.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            FilterChip(selected = tool == "image", enabled = !processing, onClick = { tool = "image" }, label = { Text("Görüntü") })
+                            FilterChip(selected = tool == "pdf", enabled = !processing, onClick = { tool = "pdf" }, label = { Text("Görsel → PDF") })
+                        }
+                        Box(Modifier.weight(1f)) {
+                            if (tool == "image") Converter { processing = it }
+                            else PdfWorkspace(contentResolver) { processing = it }
+                        }
+                    }
+                }
             }
         }
     }
 
     @Composable
-    private fun Converter() {
+    private fun Converter(onBusyChange: (Boolean) -> Unit) {
         var selected by remember { mutableStateOf<Uri?>(null) }
         var quality by remember { mutableFloatStateOf(85f) }
         var format by remember { mutableStateOf(ImageOutput.JPEG) }
@@ -45,6 +58,7 @@ class MainActivity : ComponentActivity() {
         val save = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument(result?.format?.mime ?: format.mime)) { uri ->
             val converted = result
             if (uri != null && converted != null) scope.launch {
+                busy = true; onBusyChange(true)
                 try {
                     withContext(Dispatchers.IO) {
                         val stream = contentResolver.openOutputStream(uri) ?: error("Dosya açılamadı.")
@@ -52,6 +66,7 @@ class MainActivity : ComponentActivity() {
                     }
                     message = "Dosya kaydedildi."
                 } catch (_: Exception) { message = "Dosya kaydedilemedi. Başka bir konum deneyin." }
+                finally { busy = false; onBusyChange(false) }
             }
         }
         Column(Modifier.safeDrawingPadding().verticalScroll(rememberScrollState()).padding(24.dp), verticalArrangement = Arrangement.spacedBy(18.dp)) {
@@ -76,7 +91,7 @@ class MainActivity : ComponentActivity() {
                     Text("En-boy oranı korunur. JPEG saydam alanları beyaz yapar; PNG ve WebP saydamlığı korur. Kaynak metadata kaldırılır.", style = MaterialTheme.typography.bodySmall)
                     Button(modifier = Modifier.fillMaxWidth(), enabled = selected != null && !busy, onClick = {
                         scope.launch {
-                            busy = true; result = null; message = "Cihazınızda dönüştürülüyor…"
+                            busy = true; onBusyChange(true); result = null; message = "Cihazınızda dönüştürülüyor…"
                             try {
                                 val width = if (maxWidth.isBlank()) null else maxWidth.toIntOrNull() ?: error("Geçerli bir genişlik girin.")
                                 val bytes = withContext(Dispatchers.IO) {
@@ -86,13 +101,13 @@ class MainActivity : ComponentActivity() {
                                 result = withContext(Dispatchers.Default) { ImageConverter.convert(bytes, quality.toInt(), width, format) }
                                 message = "Hazır: ${result!!.width} × ${result!!.height} px · ${result!!.bytes.size / 1024} KB"
                             } catch (e: Exception) { message = e.message ?: "Görüntü açılamadı." }
-                            finally { busy = false }
+                            finally { busy = false; onBusyChange(false) }
                         }
                     }) { Text(if (busy) "İşleniyor…" else "Dönüştür →") }
                 }
             }
             Text(message, style = MaterialTheme.typography.bodyMedium)
-            if (result != null) Button(onClick = { save.launch("converter-mce.${result!!.format.extension}") }, modifier = Modifier.fillMaxWidth()) { Text("${result!!.format.name} dosyasını kaydet ↓") }
+            if (result != null) Button(enabled = !busy, onClick = { save.launch("converter-mce.${result!!.format.extension}") }, modifier = Modifier.fillMaxWidth()) { Text("${result!!.format.name} dosyasını kaydet ↓") }
             Spacer(Modifier.height(12.dp))
             Text("Dosyalarınız cihazınızda kalır. Bu geliştirme sürümünde reklam ve bulut yüklemesi etkin değildir.", style = MaterialTheme.typography.bodySmall)
         }

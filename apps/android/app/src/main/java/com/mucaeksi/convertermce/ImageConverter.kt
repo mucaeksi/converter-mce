@@ -41,9 +41,8 @@ object ImageConverter {
         return maxOf(1, (width * scale).roundToInt()) to maxOf(1, (height * scale).roundToInt())
     }
 
-    fun convert(input: ByteArray, quality: Int = 85, maxWidth: Int? = null, format: ImageOutput = ImageOutput.JPEG): ConvertedImage {
+    internal fun decode(input: ByteArray, maxWidth: Int? = null): Bitmap {
         require(input.isNotEmpty() && input.size <= MAX_INPUT_BYTES) { "Dosya boş veya 10 MB sınırını aşıyor." }
-        require(quality in 10..95) { "Kalite 10–95 arasında olmalı." }
         val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
         BitmapFactory.decodeByteArray(input, 0, input.size, bounds)
         require(bounds.outMimeType in listOf("image/png", "image/jpeg", "image/webp", "image/bmp")) { "PNG, JPEG, WebP veya BMP seçin." }
@@ -70,11 +69,16 @@ object ImageConverter {
                 offset += length.toInt() + 12
             }
         }
-        val decoded = ImageDecoder.decodeBitmap(ImageDecoder.createSource(ByteBuffer.wrap(input))) { decoder, info, _ ->
+        return ImageDecoder.decodeBitmap(ImageDecoder.createSource(ByteBuffer.wrap(input))) { decoder, info, _ ->
             val size = dimensions(info.size.width, info.size.height, maxWidth)
             decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
             decoder.setTargetSize(size.first, size.second)
         }
+    }
+
+    fun convert(input: ByteArray, quality: Int = 85, maxWidth: Int? = null, format: ImageOutput = ImageOutput.JPEG): ConvertedImage {
+        require(quality in 10..95) { "Kalite 10–95 arasında olmalı." }
+        val decoded = decode(input, maxWidth)
         try {
             val output = Bitmap.createBitmap(decoded.width, decoded.height, Bitmap.Config.ARGB_8888)
             try {

@@ -32,7 +32,7 @@ sesten WAV/MP3 üretme/kesme/seviye ayarı; desteklenen kısa videodan WebM üre
 kesme ve boyutlandırma. Ses kaynak sınırı 10 MB/120 saniye/2 kanal; video
 25 MB/60 saniye/1920×1080 pikseldir. Video kayıplı ve gerçek zamanlıdır; ağır
 cihaz yükünde kare kaybı olabilir. PDF ve tablo sınırları arayüzde gösterilir.
-Android şu aşamada yalnızca görüntü araçlarını içerir. Codec, lisans, bellek ve mobil performans testleri
+Android görüntü araçlarını ve görselden PDF oluşturmayı içerir; PDF birleştirme ve medya dönüşümleri henüz Android kapsamı dışındadır. Codec, lisans, bellek ve mobil performans testleri
 geçmeden format ilan edilmez. Büyük video, tam Office→PDF, ağır OCR ve üretken
 AI işlemleri bu ücretsiz kapsam için garanti edilmez; desteklenmeyen işlem açıkça
 gösterilir. Tarayıcıda çalışmayan iş gizlice sunucuya gönderilmez.

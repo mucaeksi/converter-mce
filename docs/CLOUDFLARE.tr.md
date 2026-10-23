@@ -56,10 +56,12 @@ korunur; güncel dağıtım hedefi değildir. Yerel native Containers emülasyon
 kernel/iptables eksiğiyle çalışmadığından aynı imajla ağ kapalı relay kullanılır.
 Sunucu taslağındaki Access/D1/R2/Queues akışı ücretsiz üretimde etkin değildir.
 
-Reklam ve Play Store yayını henüz yoktur. Android belge/medya modülleri, test
+Reklam ve Play Store yayını henüz yoktur. Android ileri belge/medya modülleri, test
 reklamları, gizlilik/izin akışı, release imzası ve mağaza doğrulaması sonraki işlerdir.
 Güncel kotalar: [FREE-PLAN.tr.md](FREE-PLAN.tr.md).
 
 ExcelJS ve medya/PDF panelleri ihtiyaç olduğunda yüklenir. Belge worker
 ve tek kitap önbelleği panel kapanana veya işlem iptal edilene kadar yaşar.
 Performans kanıtı: [PERFORMANCE.tr.md](PERFORMANCE.tr.md).
+
+Android görsel→PDF, platform PdfDocument ve cihaz codec’leriyle çalışır; üçüncü taraf PDF çalışma zamanı veya sunucu eklenmedi. Gerçek cihaz doğrulama sınırları ANDROID.tr.md içindedir.

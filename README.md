@@ -20,9 +20,10 @@ Etkin olmayan sunucu işleme taslağı ayrıca depoda korunur.
   fiziksel temizliği yapar. Kullanıcı daha önce silebilir. Silinen işler kotayı sıfırlamaz.
 - Android: native Kotlin/Compose, çevrimdışı PNG/JPEG/WebP/BMP → JPEG/PNG/WebP, kalite/boyut ayarı,
   JPEG için beyaz, PNG/WebP için saydamlık koruyan arka plan ve sistem dosya seçiciyle kaydetme. Android 9 / API 28+.
+- Android görsel→PDF: 1–8 görsel, sayfa sıralama/kaldırma, otomatik dikey/yatay A4, genişlik ayarı, iptal ve yerel PDF kaydetme.
 
 Tam Office→PDF, OCR, uzun/büyük medya, toplu işler, reklam SDK'sı ve Android'in
-belge/medya araçları sonraki aşamalardır. Tüm format çiftlerinin desteklendiği
+ileri belge/medya araçları sonraki aşamalardır. Tüm format çiftlerinin desteklendiği
 iddia edilmez. Veri dönüşümü biçimlendirmeyi korumaz ve formüllü Excel'i reddeder.
 PDF formları/imza alanları reddedilir. Codec ve kalite sınırlamaları arayüzde yazılıdır.
 
@@ -85,7 +86,8 @@ dağıtımının sağlama toplamları doğrulanır. Gradle çalıştırıcısı 
 sistem Java CA deposunu kullanır; kimlik bilgileri dosyalara yazılmaz.
 
 Debug APK: `apps/android/app/build/outputs/apk/debug/app-debug.apk`.
-Bu mağazaya yüklenebilir imzalı release değildir. Gerçek cihaz/emülatör ve
+Bu mağazaya yüklenebilir imzalı release değildir. Android PDF kapsamı ve test sınırları
+[ANDROID.tr.md](docs/ANDROID.tr.md) içinde belgelenir. Gerçek cihaz/emülatör ve
 Play internal test doğrulaması ayrıca gerekir. APK ve build çıktıları Git'e eklenmez.
 
 ## Kontroller

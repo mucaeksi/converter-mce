@@ -14,7 +14,7 @@ için kanıt değildir.
 | Gerçek tarayıcı testleri | 3 geçti; cihaz dönüşümü, sunucu akışı, mobil/cihaz gizliliği |
 | İmajın gerçek HTTP sunucusu | 3 fonksiyonel kontrol geçti: JPEG decode/piksel/boyut; bozuk giriş; desteklenmeyen biçim |
 | Android debug build | Geçti; APK üretildi |
-| Android Robolectric native graphics testleri | 6 geçti, 0 başarısız, 0 atlanan |
+| Android yerel Robolectric testleri | 9 geçti: 6 görüntü, 3 PDF yerleşim/limit/iptal |
 | Android lint | Geçti |
 | Wrangler deploy dry-run | Geçti; Worker/varlıklar ve Container imajı paketlendi |
 | Skill dosyaları | 19 kaynak/lisans dosyasının SHA-256 eşleşmesi korundu |
@@ -93,3 +93,19 @@ sürümü, kaynak arşivi ve LGPL/GPL metinleri public/vendor altında korunur.
 Bu CPU performansı garantisi değildir; yöntem ve gzip ayrımı PERFORMANCE.tr.md'dedir.
 
 Son sürümde 18 testin tamamı gerçek Cloudflare adresinde tekrar geçti. Yayın sürümü: 22d25568-fb95-4935-96f6-493ae41632da. Yeni ücretli servis açılmadı.
+
+
+## Android görsel→PDF
+
+APK build ve lint geçti. 6 gerçek Bitmap decode/encode testi ile 3 PDF sayfa
+geometrisi, kaynak limiti ve erken iptal testi yerelde geçti. Android'in native
+PdfDocument/PdfRenderer API'leri Robolectric'te uygulanmadığından ilk uçtan uca
+PDF denemesi `document is closed` ile başarısız oldu. Bu bir gerçek Android
+cihaz sonucu değildir; sorun çözülmüş veya test geçmiş gibi gösterilmez.
+
+Sayfa sayısı/boyutu/sırası, gerçek render renkleri/saydamlık, geçersiz kaynaklar
+ve sayfalar arası iptal/yeniden deneme için 3 cihaz testi androidTest altındadır.
+Test APK'sı derlendi. `adb devices` boş, emulator aracı ve /dev/kvm bulunmadığı
+için bu 3 test çalıştırılmadı. Sonuç: native PDF üretimi cihazda doğrulama bekliyor.
+Uygulama PNG/JPEG/WebP/BMP görselleri A4 PDF'e yerleştirir; mevcut PDF dosyalarını
+birleştirme veya düzenleme bu Android aracının kapsamı değildir.
