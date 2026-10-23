@@ -62,4 +62,24 @@ class ImageConverterTest {
             decoded.recycle()
         }
     }
+
+    @Test fun webpAndBmpInputsDecodeToRealResizedPng() {
+        for (name in listOf("blue.webp", "blue.bmp")) {
+            val input = javaClass.classLoader!!.getResourceAsStream(name)!!.use { ImageConverter.readInput(it) }
+            val result = ImageConverter.convert(input, 85, 40, ImageOutput.PNG)
+            val decoded = BitmapFactory.decodeByteArray(result.bytes, 0, result.bytes.size)
+            assertEquals(40, decoded.width)
+            assertEquals(20, decoded.height)
+            val pixel = decoded.getPixel(10, 10)
+            assertTrue(Color.blue(pixel) > 170)
+            assertTrue(Color.red(pixel) < 70)
+            decoded.recycle()
+        }
+    }
+
+    @Test fun rejectsAnimatedWebpInsteadOfSilentlyDroppingFrames() {
+        val input = javaClass.classLoader!!.getResourceAsStream("animated.webp")!!.use { ImageConverter.readInput(it) }
+        val error = assertThrows(IllegalArgumentException::class.java) { ImageConverter.convert(input) }
+        assertTrue(error.message!!.contains("Animasyonlu"))
+    }
 }

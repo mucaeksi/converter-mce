@@ -60,6 +60,27 @@ test('video resize and trim produce decodable WebM frames and non-silent audio',
   expect(uploads).toHaveLength(0);
 });
 
+test('MP3 output is compressed, stereo and decodes to the trimmed audible signal', async ({ page }) => {
+  const posts: string[] = []; page.on('request', r => { if (r.method() === 'POST') posts.push(r.url()); });
+  await page.goto('/'); await page.getByRole('button', { name: 'Ses', exact: true }).click();
+  await page.getByLabel('Ses dosyası seç').setInputFiles('tests/fixtures/tone.wav');
+  await page.getByLabel('Ses çıktı biçimi').selectOption('mp3'); await page.getByLabel('Başlangıç (saniye)', { exact: true }).fill('0.25'); await page.getByLabel('Bitiş (saniye, isteğe bağlı)').fill('1.25');
+  await page.getByRole('button', { name: 'Dönüştür', exact: true }).click(); await expect(page.getByRole('heading', { name: 'Yeni dosyan hazır.' })).toBeVisible();
+  const waiting = page.waitForEvent('download'); await page.getByRole('link', { name: 'Dosyayı indir' }).click(); const file = await waiting;
+  const bytes = await readFile((await file.path())!); expect(file.suggestedFilename()).toBe('converter-mce.mp3');
+  expect(bytes[0]).toBe(255); expect(bytes[1] & 224).toBe(224); expect(bytes.length).toBeGreaterThan(18_000); expect(bytes.length).toBeLessThan(40_000);
+  const decoded = await page.evaluate(async data => {
+    const ctx = new AudioContext({ sampleRate: 44100 });
+    try {
+      const buffer = await ctx.decodeAudioData(new Uint8Array(data).buffer); const samples = buffer.getChannelData(0); let peak = 0, crossings = 0;
+      for (let i = 1; i < samples.length; i++) { peak = Math.max(peak, Math.abs(samples[i])); if (samples[i] > 0.002 && samples[i - 1] <= 0.002) crossings++; }
+      return { duration: buffer.duration, channels: buffer.numberOfChannels, peak, crossings };
+    } finally { await ctx.close(); }
+  }, [...bytes]);
+  expect(decoded.channels).toBe(2); expect(decoded.duration).toBeGreaterThan(1); expect(decoded.duration).toBeLessThan(1.12);
+  expect(decoded.peak).toBeGreaterThan(0.1); expect(decoded.crossings).toBeGreaterThan(435); expect(decoded.crossings).toBeLessThan(445); expect(posts).toHaveLength(0);
+});
+
 test('media rejects invalid ranges and cancellation leaves no downloadable output', async ({ page }) => {
   await page.goto('/'); await page.getByRole('button', { name: 'Ses', exact: true }).click();
   await page.getByLabel('Ses dosyası seç').setInputFiles('tests/fixtures/tone.wav');

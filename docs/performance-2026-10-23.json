@@ -1,0 +1,72 @@
+{
+  "date": "2026-10-23",
+  "scenario": "Fresh Chromium context, panel plus 1000-row two-column CSV to JSON",
+  "baseline_commit": "1500b33fed8d02a2d39e9d5a7be9ac016f6d4a42",
+  "deployed_version": "22d25568-fb95-4935-96f6-493ae41632da",
+  "units": "Decoded JavaScript response bytes; gzip is a local zlib estimate, not observed wire bytes",
+  "before": {
+    "files": [
+      {
+        "name": "/assets/index-CKML1mSS.js",
+        "bytes": 267858,
+        "gzip": 82238
+      },
+      {
+        "name": "/assets/document.worker-DLxOUaDH.js",
+        "bytes": 650,
+        "gzip": 344
+      },
+      {
+        "name": "/assets/tables-BXwJEGPE.js",
+        "bytes": 967240,
+        "gzip": 271305
+      },
+      {
+        "name": "/assets/rolldown-runtime-FCrsKEuO.js",
+        "bytes": 1005,
+        "gzip": 585
+      }
+    ],
+    "totalBytes": 1236753,
+    "gzip": 354472,
+    "csvMilliseconds": 275
+  },
+  "after": {
+    "files": [
+      {
+        "name": "/assets/index-BBoWX-9e.js",
+        "bytes": 240101,
+        "gzip": 75294
+      },
+      {
+        "name": "/assets/DocumentTools-CumBIMbO.js",
+        "bytes": 8803,
+        "gzip": 3252
+      },
+      {
+        "name": "/assets/local-tools-CSNojSe1.js",
+        "bytes": 1089,
+        "gzip": 626
+      },
+      {
+        "name": "/assets/document.worker-qsB2yQpm.js",
+        "bytes": 667,
+        "gzip": 345
+      },
+      {
+        "name": "/assets/tables-B7eIPyIR.js",
+        "bytes": 37247,
+        "gzip": 15339
+      },
+      {
+        "name": "/assets/rolldown-runtime-FCrsKEuO.js",
+        "bytes": 1005,
+        "gzip": 585
+      }
+    ],
+    "totalBytes": 288912,
+    "gzip": 95441,
+    "csvMilliseconds": 169
+  },
+  "decoded_js_reduction_percent": 76.64
+}

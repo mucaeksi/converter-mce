@@ -23,6 +23,7 @@
     "android:debug": "node scripts/android-gradle.mjs"
   },
   "dependencies": {
+    "@breezystack/lamejs": "1.2.7",
     "@cloudflare/containers": "0.3.7",
     "exceljs": "4.4.0",
     "fflate": "0.8.3",

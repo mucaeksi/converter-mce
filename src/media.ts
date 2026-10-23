@@ -19,7 +19,7 @@ function interval(start: number, end: number | undefined, duration: number, maxi
   return until;
 }
 
-export async function convertAudio(file: File, start: number, end: number | undefined, rate: number, gain: number, signal: AbortSignal): Promise<LocalResult> {
+export async function convertAudio(file: File, start: number, end: number | undefined, rate: number, gain: number, signal: AbortSignal, format: 'wav' | 'mp3' = 'wav'): Promise<LocalResult> {
   if (!file.size || file.size > 10 * 1024 * 1024 || !/\.(mp3|wav|m4a|aac|ogg|oga|flac|webm)$/i.test(file.name)) throw new Error('En fazla 10 MB desteklenen ses dosyası seçin.');
   const context = new AudioContext({ sampleRate: rate });
   const element = document.createElement('audio'), url = URL.createObjectURL(file);
@@ -31,7 +31,7 @@ export async function convertAudio(file: File, start: number, end: number | unde
     if (audio.numberOfChannels > 2 || audio.duration > 120.1) throw new Error('En fazla iki kanal ve 120 saniye ses desteklenir.');
     const first = Math.round(start * audio.sampleRate), last = Math.min(audio.length, Math.round(until * audio.sampleRate));
     const channels = Array.from({ length: audio.numberOfChannels }, (_, i) => audio.getChannelData(i).slice(first, last));
-    return await runLocal<LocalResult>({ kind: 'audio', channels, rate: audio.sampleRate, gain }, signal);
+    return await runLocal<LocalResult>({ kind: 'audio', channels, rate: audio.sampleRate, gain, format }, signal);
   } finally { element.removeAttribute('src'); element.load(); URL.revokeObjectURL(url); await context.close(); }
 }
 

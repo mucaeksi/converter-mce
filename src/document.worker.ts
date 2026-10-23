@@ -9,8 +9,8 @@ self.onmessage = async ({ data }: MessageEvent<LocalRequest>) => {
       const { inspectSheets } = await import('./tables');
       self.postMessage({ sheets: await inspectSheets(data.file) });
     } else if (data.kind === 'audio') {
-      const { encodeWav } = await import('./audio');
-      self.postMessage(encodeWav(data.channels, data.rate, data.gain));
+      const { encodeAudio } = await import('./audio');
+      self.postMessage(await encodeAudio(data.channels, data.rate, data.gain, data.format));
     } else {
       const { convertTable } = await import('./tables');
       self.postMessage(await convertTable(data.file, data.format, data.sheet, data.delimiter));

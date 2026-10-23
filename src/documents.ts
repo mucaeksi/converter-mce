@@ -1,4 +1,5 @@
 import { PDFDocument, degrees } from 'pdf-lib';
+import { deviceImageHeader } from '../shared/device-image';
 
 export function pageSelection(value: string, count: number): number[] {
   if (!value.trim()) return Array.from({ length: count }, (_, i) => i);
@@ -17,12 +18,32 @@ export function pageSelection(value: string, count: number): number[] {
 }
 
 export async function convertPdf(files: File[], operation: string, selection: string, rotation: number) {
-  if (!['merge', 'extract', 'rotate'].includes(operation) || ![0, 90, 180, 270].includes(rotation)) throw new Error('Geçersiz PDF işlemi.');
+  if (!['merge', 'extract', 'rotate', 'images'].includes(operation) || ![0, 90, 180, 270].includes(rotation)) throw new Error('Geçersiz PDF işlemi.');
   if (!files.length || files.length > 8 || files.some(f => f.size > 10 * 1024 * 1024) || files.reduce((n, f) => n + f.size, 0) > 20 * 1024 * 1024) throw new Error('En fazla 8 PDF; dosya başına 10 MB, toplam 20 MB seçin.');
-  if (operation !== 'merge' && files.length !== 1) throw new Error('Sayfa işlemleri için tek PDF seçin.');
+  if (!['merge', 'images'].includes(operation) && files.length !== 1) throw new Error('Sayfa işlemleri için tek PDF seçin.');
   const output = await PDFDocument.create();
+  let imagePixels = 0;
   for (const file of files) {
     const bytes = new Uint8Array(await file.arrayBuffer());
+    if (operation === 'images') {
+      const header = deviceImageHeader(bytes);
+      imagePixels += header.width * header.height;
+      if (imagePixels > 16_000_000) throw new Error('Görsellerin toplamı en fazla 16 megapiksel olabilir.');
+      const bitmap = await createImageBitmap(new Blob([bytes], { type: header.mime }), { imageOrientation: 'from-image' });
+      try {
+        if (bitmap.width * bitmap.height > 8_000_000) throw new Error('Görüntü en fazla 8 megapiksel olabilir.');
+        const canvas = new OffscreenCanvas(bitmap.width, bitmap.height), context = canvas.getContext('2d');
+        if (!context) throw new Error('Tarayıcınız görselden PDF oluşturmayı desteklemiyor.');
+        context.fillStyle = '#ffffff'; context.fillRect(0, 0, canvas.width, canvas.height); context.drawImage(bitmap, 0, 0);
+        const image = await output.embedPng(await (await canvas.convertToBlob({ type: 'image/png' })).arrayBuffer());
+        const page = output.addPage(bitmap.width > bitmap.height ? [841.89, 595.28] : [595.28, 841.89]);
+        const scale = Math.min((page.getWidth() - 48) / image.width, (page.getHeight() - 48) / image.height);
+        const width = image.width * scale, height = image.height * scale;
+        page.drawImage(image, { x: (page.getWidth() - width) / 2, y: (page.getHeight() - height) / 2, width, height });
+        if (rotation) page.setRotation(degrees(rotation));
+      } finally { bitmap.close(); }
+      continue;
+    }
     if (!new TextDecoder('ascii').decode(bytes.subarray(0, 1024)).includes('%PDF-')) throw new Error('Geçerli bir PDF seçin.');
     let source: PDFDocument;
     try { source = await PDFDocument.load(bytes); }

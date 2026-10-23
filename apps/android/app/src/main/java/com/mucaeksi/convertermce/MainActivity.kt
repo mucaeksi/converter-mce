@@ -36,7 +36,7 @@ class MainActivity : ComponentActivity() {
         var format by remember { mutableStateOf(ImageOutput.JPEG) }
         var maxWidth by remember { mutableStateOf("") }
         var result by remember { mutableStateOf<ConvertedImage?>(null) }
-        var message by remember { mutableStateOf("PNG veya JPEG seçerek başlayın.") }
+        var message by remember { mutableStateOf("PNG, JPEG, WebP veya BMP seçerek başlayın.") }
         var busy by remember { mutableStateOf(false) }
         val scope = rememberCoroutineScope()
         val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
@@ -62,8 +62,8 @@ class MainActivity : ComponentActivity() {
             Card(colors = CardDefaults.cardColors(containerColor = Color.White)) {
                 Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
                     Text("01  Dosyanı seç", style = MaterialTheme.typography.titleMedium)
-                    Text("PNG / JPEG → JPG, PNG, WebP\nEn fazla 10 MB ve 8 megapiksel", style = MaterialTheme.typography.bodySmall)
-                    OutlinedButton(onClick = { picker.launch(arrayOf("image/png", "image/jpeg")) }, enabled = !busy) { Text(if (selected == null) "Dosya seç" else "Dosyayı değiştir") }
+                    Text("PNG / JPEG / WebP / BMP → JPG, PNG, WebP\nEn fazla 10 MB ve 8 megapiksel", style = MaterialTheme.typography.bodySmall)
+                    OutlinedButton(onClick = { picker.launch(arrayOf("image/png", "image/jpeg", "image/webp", "image/bmp")) }, enabled = !busy) { Text(if (selected == null) "Dosya seç" else "Dosyayı değiştir") }
                     Text("02  Çıktını ayarla", style = MaterialTheme.typography.titleMedium)
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         ImageOutput.entries.forEach { option ->

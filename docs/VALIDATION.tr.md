@@ -10,21 +10,21 @@ için kanıt değildir.
 | Wheel hazırlama | Geçti; resmi dosya ve sabit SHA-256 |
 | D1 migration tekrar uygulama | Geçti; ikinci çalıştırmada uygulanacak migration yok |
 | TypeScript + web production build | Geçti |
-| Worker/sözleşme testleri | 9 geçti, 0 başarısız, 0 atlanan |
+| Worker/sözleşme testleri | 12 geçti, 0 başarısız, 0 atlanan |
 | Gerçek tarayıcı testleri | 3 geçti; cihaz dönüşümü, sunucu akışı, mobil/cihaz gizliliği |
 | İmajın gerçek HTTP sunucusu | 3 fonksiyonel kontrol geçti: JPEG decode/piksel/boyut; bozuk giriş; desteklenmeyen biçim |
 | Android debug build | Geçti; APK üretildi |
-| Android Robolectric native graphics testleri | 4 geçti, 0 başarısız, 0 atlanan |
+| Android Robolectric native graphics testleri | 6 geçti, 0 başarısız, 0 atlanan |
 | Android lint | Geçti |
 | Wrangler deploy dry-run | Geçti; Worker/varlıklar ve Container imajı paketlendi |
 | Skill dosyaları | 19 kaynak/lisans dosyasının SHA-256 eşleşmesi korundu |
 | Cloudflare hesap/token | Aktif hesap token'ı doğrulandı; D1/R2/Queue oluşturuldu |
 | Uzak D1 migration | `0001_jobs.sql` başarıyla uygulandı |
 | Özel R2 | Public erişim kapalı; `jobs/` lifecycle bir gün |
-| Cihaz sürümü deploy | Başarılı; sürüm `d6d82e09-3e34-4d38-a99e-c517eadd8831` |
+| Cihaz sürümü deploy | Başarılı; sürüm `22d25568-fb95-4935-96f6-493ae41632da` |
 | Canlı mobil Chromium | Gerçek 40×20 JPEG; beyaz piksel, indirme ve sıfır POST yüklemesi |
-| Ücretsiz web araçları, yerel Chromium | 9 geçti: PDF içerik/sıra/döndürme; form reddi; Excel/veri; ZIP sınırı; mobil; WAV/MP3 sinyal; WebM görüntü/ses; iptal |
-| Ücretsiz web araçları, canlı Chromium | Aynı 9 test gerçek Cloudflare adresinde geçti |
+| Ücretsiz web araçları, yerel Chromium | 18 geçti: PDF içerik/sıra/döndürme; form reddi; Excel/veri; ZIP sınırı; mobil; WAV/MP3 sinyal; WebM görüntü/ses; iptal |
+| Ücretsiz web araçları, canlı Chromium | 18 test gerçek Cloudflare adresinde geçti |
 | Üretim bağımlılıkları audit | 0 bilinen bulgu; fflate 0.8.3 ve uuid 11.1.1 düzeltmeleri sabitlendi |
 | Canlı HTTP | Health 200; capabilities 200 / serverAuth=unconfigured; sunucu işi 503 |
 
@@ -71,4 +71,25 @@ sunulur. Yeni ücretli plan açılmadı. Tarayıcılar arası codec matrisi, fiz
 Android cihazları, Play release imzası, mağaza yayını ve gerçek reklamlar için
 bu testlerden onay çıkarılmaz.
 
-Son yayında yalnızca üçüncü taraf lisans bildirimleri eklendi; test edilen uygulama JS/CSS varlıkları aynı kaldı. Yeni lockfile ile temiz npm ci ve build tekrar geçti.
+Önceki sürümün son yayınında yalnızca üçüncü taraf lisans bildirimleri eklenmişti; test edilen uygulama JS/CSS varlıkları aynı kaldı. Yeni lockfile ile temiz npm ci ve build tekrar geçti.
+
+
+## Uzantı ve performans güncellemesi
+
+Yerel ücretsiz yapılandırmada 18 Chromium testi geçti. Yeni örnekler WebP/BMP/GIF
+piksel ve boyut, BMP satır dolgusu, ICO PNG gövdesi ve alfa, animasyon reddi,
+görselden PDF'in gerçek gömülü RGB verisi, JSONL/NDJSON türleri, HTML/Markdown
+kaçışları ve aynı adlı farklı Excel dosyalarında doğru önbellek davranışını kapsar.
+MP3 çıktısı yalnızca uzantıyla doğrulanmadı: gerçek MPEG frame başlığı, küçük
+kodlanmış boyut, stereo decode, süre ve 440 Hz sinyal kontrol edildi.
+
+12 Worker/sözleşme testi ve önceki 3 görüntü/Docker regresyon testi geçti.
+Android build/lint başarılı; 6 native graphics testi PNG/JPEG/WebP çıktıları,
+WebP/BMP girişleri ve animasyonlu WebP reddini kapsar. Fiziksel cihaz testi değildir.
+Üretim bağımlılığı audit sonucu 0 bilinen açık. Yeni ses kodlayıcısının sabit kaynak
+sürümü, kaynak arşivi ve LGPL/GPL metinleri public/vendor altında korunur.
+
+Ölçülen CSV→JSON JavaScript yükü 1.236.753→288.912 bayt; fark %76,64.
+Bu CPU performansı garantisi değildir; yöntem ve gzip ayrımı PERFORMANCE.tr.md'dedir.
+
+Son sürümde 18 testin tamamı gerçek Cloudflare adresinde tekrar geçti. Yayın sürümü: 22d25568-fb95-4935-96f6-493ae41632da. Yeni ücretli servis açılmadı.

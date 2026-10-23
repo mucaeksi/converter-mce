@@ -9,9 +9,9 @@ cihazında çalışır. Ücretli Containers planı etkinleştirilmez.
 | Panel ve codec dosyaları | Workers Static Assets; statik istekler ücretsiz ve sınırsız |
 | Küçük health/capabilities API | Workers Free; hesap genelinde günlük 100.000 istek, çağrı başına 10 ms CPU |
 | Görüntü | Web Worker + tarayıcı codec'leri; Android platform decode/encode |
-| PDF | Cihazda pdf-lib: birleştirme, sayfa çıkarma/sıralama ve döndürme |
+| PDF | Cihazda pdf-lib: birleştirme, sayfa çıkarma/sıralama, döndürme ve görselden PDF |
 | Excel/veri | Cihazda Papa Parse, ExcelJS ve sınırlandırılmış ZIP açma |
-| Ses | Cihazda Web Audio decode; Web Worker içinde WAV/PCM16 encode |
+| Ses | Cihazda Web Audio decode; Web Worker içinde WAV/PCM16 veya MP3 encode |
 | Kısa video | Canvas/MediaRecorder ile WebM; kaynak ses Opus olarak işlenir |
 | Dosyalar | Cihaz belleği ve yerel indirme; sunucuya yükleme yok |
 | Yayın | Codex'ten Wrangler; GitHub→Cloudflare Workers Builds bağlantısı henüz kurulmadı |
@@ -32,7 +32,7 @@ flowchart LR
 sunulur. `public/_headers` aynı CSP ve güvenlik başlıklarını statik dosyalara ekler.
 Dönüşüm kütüphaneleri kendi domainimizden yüklenir; harici codec CDN çağrısı yoktur.
 
-PDF/tablo ve WAV kodlama ayrı Web Worker içinde çalışır; iptal veya 30 saniye
+PDF/tablo ve WAV/MP3 kodlama ayrı Web Worker içinde çalışır; iptal veya 30 saniye
 sınırında worker sonlandırılır. Excel açılmış boyutu 32 MB/1.000 ZIP parçasıyla
 sınırlanır. Girdi/sayfa/satır/hücre sınırları ve kayıplar arayüzde gösterilir.
 Şifreli/formlu PDF, formüllü/makrolu/dış bağlantılı XLSX ve iç içe JSON reddedilir.
@@ -59,3 +59,7 @@ Sunucu taslağındaki Access/D1/R2/Queues akışı ücretsiz üretimde etkin de�
 Reklam ve Play Store yayını henüz yoktur. Android belge/medya modülleri, test
 reklamları, gizlilik/izin akışı, release imzası ve mağaza doğrulaması sonraki işlerdir.
 Güncel kotalar: [FREE-PLAN.tr.md](FREE-PLAN.tr.md).
+
+ExcelJS ve medya/PDF panelleri ihtiyaç olduğunda yüklenir. Belge worker
+ve tek kitap önbelleği panel kapanana veya işlem iptal edilene kadar yaşar.
+Performans kanıtı: [PERFORMANCE.tr.md](PERFORMANCE.tr.md).

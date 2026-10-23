@@ -22,13 +22,13 @@ otomatik ücretli plana geçiş yapılmaz.
 
 Webde dönüşüm Web Worker, tarayıcı codec'leri ve gerektiğinde ölçülmüş WASM
 modülleriyle cihazda; Android'de platform codec'leri ve yerel kütüphanelerle
-çalışır. Mevcut web kapsamı PNG/JPEG → JPEG/PNG/WebP, Android kapsamı
-PNG/JPEG → JPEG/PNG/WebP; dosya başına 10 MB ve 8 MP sınırıdır. Cihaz dönüşümlerinde
+çalışır. Web görüntü kapsamı PNG/JPEG/WebP/BMP/tek kareli GIF → JPEG/PNG/WebP/BMP/ICO;
+Android kapsamı PNG/JPEG/WebP/BMP → JPEG/PNG/WebP; dosya başına 10 MB ve 8 MP sınırıdır. Cihaz dönüşümlerinde
 günlük sunucu işi kotası uygulanmaz; cihaz kaynak sınırları geçerlidir.
 
-Web araçları: PDF birleştirme, sayfa çıkarma/sıralama/döndürme;
-CSV/TSV/JSON/XLSX değer dönüşümü ve Excel sayfa seçimi; tarayıcının çözebildiği
-sesten WAV üretme/kesme/seviye ayarı; desteklenen kısa videodan WebM üretme,
+Web araçları: PDF birleştirme, sayfa çıkarma/sıralama/döndürme ve görselden PDF;
+CSV/TSV/JSON/JSONL/NDJSON/XLSX değer dönüşümü, HTML/Markdown tablo çıktısı ve Excel sayfa seçimi; tarayıcının çözebildiği
+sesten WAV/MP3 üretme/kesme/seviye ayarı; desteklenen kısa videodan WebM üretme,
 kesme ve boyutlandırma. Ses kaynak sınırı 10 MB/120 saniye/2 kanal; video
 25 MB/60 saniye/1920×1080 pikseldir. Video kayıplı ve gerçek zamanlıdır; ağır
 cihaz yükünde kare kaybı olabilir. PDF ve tablo sınırları arayüzde gösterilir.
@@ -50,3 +50,5 @@ Kaynaklar:
 - https://developers.cloudflare.com/workers/static-assets/billing-and-limitations/
 - https://developers.cloudflare.com/workers/platform/pricing/
 - https://developers.cloudflare.com/r2/pricing/
+
+Kod ve bellek iyileştirmeleri: [PERFORMANCE.tr.md](PERFORMANCE.tr.md). Yeni ücretli hizmet kullanılmaz.

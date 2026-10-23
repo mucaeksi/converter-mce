@@ -8,6 +8,7 @@ import android.graphics.ImageDecoder
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import java.nio.ByteBuffer
+import java.nio.ByteOrder
 import kotlin.math.roundToInt
 
 @Suppress("DEPRECATION")
@@ -45,8 +46,19 @@ object ImageConverter {
         require(quality in 10..95) { "Kalite 10–95 arasında olmalı." }
         val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
         BitmapFactory.decodeByteArray(input, 0, input.size, bounds)
-        require(bounds.outMimeType in listOf("image/png", "image/jpeg")) { "PNG veya JPEG seçin." }
+        require(bounds.outMimeType in listOf("image/png", "image/jpeg", "image/webp", "image/bmp")) { "PNG, JPEG, WebP veya BMP seçin." }
         dimensions(bounds.outWidth, bounds.outHeight, maxWidth)
+        if (bounds.outMimeType == "image/webp") {
+            val view = ByteBuffer.wrap(input).order(ByteOrder.LITTLE_ENDIAN)
+            var offset = 12
+            while (offset + 8 <= input.size) {
+                val length = view.getInt(offset + 4).toLong() and 0xffffffffL
+                val chunk = String(input, offset, 4, Charsets.US_ASCII)
+                require(offset.toLong() + 8 + length <= input.size) { "WebP parçası eksik." }
+                require(chunk != "ANIM" && chunk != "ANMF" && !(chunk == "VP8X" && length >= 10 && (input[offset + 8].toInt() and 2) != 0)) { "Animasyonlu WebP desteklenmiyor." }
+                offset += 8 + length.toInt() + (length.toInt() and 1)
+            }
+        }
         if (bounds.outMimeType == "image/png") {
             val view = ByteBuffer.wrap(input)
             var offset = 8

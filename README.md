@@ -6,11 +6,11 @@ Etkin olmayan sunucu işleme taslağı ayrıca depoda korunur.
 
 ## Şu anda çalışan kapsam
 
-- Web: PNG/JPEG girişinden JPEG, PNG veya WebP; kalite ve en fazla genişlik seçimi.
+- Web: PNG/JPEG/WebP/BMP ve tek kareli GIF girişinden JPEG, PNG, WebP, BMP veya ICO; kalite ve en fazla genişlik seçimi.
 - Webde cihaz içi dönüşüm: arka plan işçisinde çalışır, dosya yüklemez.
-- Web PDF: birleştirme, sayfa çıkarma/sıralama ve döndürme; en fazla 200 çıktı sayfası.
-- Web veri: CSV/TSV/JSON/XLSX değer dönüşümleri ve Excel çalışma sayfası seçimi.
-- Web ses: tarayıcının çözebildiği dosyadan WAV; kesme, örnekleme ve ses seviyesi.
+- Web PDF: birleştirme, sayfa çıkarma/sıralama, döndürme ve görselden PDF; en fazla 200 çıktı sayfası.
+- Web veri: CSV/TSV/JSON/JSONL/NDJSON/XLSX girişleri; bu biçimlere ve HTML/Markdown tablo çıktısına dönüşüm; Excel sayfa seçimi.
+- Web ses: tarayıcının çözebildiği dosyadan WAV veya MP3; kesme, örnekleme ve ses seviyesi.
 - Web video: desteklenen codec’lerde kısa video → WebM; kesme ve boyutlandırma.
 - Sunucu taslağı (yerel testlerde çalışır, üretimde kapalı): Worker → özel R2 → Queues → Container → doğrulanmış çıktı → indirme.
 - Sunucu taslağında D1 üzerinde sahiplik, idempotency, atomik günlük kota, iş durumları ve yeniden deneme.
@@ -18,7 +18,7 @@ Etkin olmayan sunucu işleme taslağı ayrıca depoda korunur.
   başarısızlıklar kotayı serbest bırakır, toplam deneme sayısı günlük 20 ile sınırlıdır.
 - Sunucu taslağında dosyalar 24 saat sonunda erişime kapanır; beş dakikalık bakım görevi
   fiziksel temizliği yapar. Kullanıcı daha önce silebilir. Silinen işler kotayı sıfırlamaz.
-- Android: native Kotlin/Compose, çevrimdışı PNG/JPEG → JPEG/PNG/WebP, kalite/boyut ayarı,
+- Android: native Kotlin/Compose, çevrimdışı PNG/JPEG/WebP/BMP → JPEG/PNG/WebP, kalite/boyut ayarı,
   JPEG için beyaz, PNG/WebP için saydamlık koruyan arka plan ve sistem dosya seçiciyle kaydetme. Android 9 / API 28+.
 
 Tam Office→PDF, OCR, uzun/büyük medya, toplu işler, reklam SDK'sı ve Android'in
@@ -34,7 +34,7 @@ Workers Free günlük 100.000 dinamik istek ve çağrı başına 10 ms CPU sağl
 Statik dosyalar ücretsiz/sınırsız asset yolundan sunulur; yalnızca küçük API'ler
 Worker'a gider. D1/R2/Queue yayına bağlı değildir. Containers ücretsiz kapsamda
 olmadığından kullanılmaz. [Ücretsiz plan ve limitler](docs/FREE-PLAN.tr.md).
-Reklam ve Play Store yayını henüz etkin değildir.
+Animasyonlu GIF/WebP reddedilir; sıkıştırmasız 24/32 bit BMP kabul edilir. ICO en fazla 256×256 ve tek görüntülüdür. MP3 çıktısı 192 kbps kayıplı sıkıştırmadır. Reklam ve Play Store yayını henüz etkin değildir.
 
 ## Geliştirme ortamı
 
@@ -140,6 +140,13 @@ Canlı web araçlarının gerçek Chromium kontrolü:
 ```sh
 CONVERTER_TEST_URL=https://converter-mce.sosyalstudio-06a486e459d2.workers.dev npx playwright test --config playwright.free.config.ts
 ```
+
+## Performans güncellemesi
+
+ExcelJS yalnızca XLSX gerektiğinde, PDF ve medya panelleri de seçildiğinde yüklenir.
+Belge paneli aynı worker ve içerik özetiyle doğrulanan tek Excel önbelleğini kullanır;
+panelden çıkış/iptal bunu temizler. CSV→JSON akışının JS boyutu yaklaşık %77 azaldı.
+Ölçüm yöntemi, önce/sonra ve sınırlar: [PERFORMANCE.tr.md](docs/PERFORMANCE.tr.md).
 
 ## Kaynaklar
 

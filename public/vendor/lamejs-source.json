@@ -1,0 +1,10 @@
+{
+  "package": "@breezystack/lamejs",
+  "version": "1.2.7",
+  "license": "LGPL-3.0",
+  "source_commit": "1fb0ef5fa177413107e2e107d054a9b994e3f79c",
+  "source_repository": "https://github.com/shijinyu/lamejs",
+  "source_archive": "/vendor/lamejs-1.2.7-source.tar.gz",
+  "sha256": "188188c5d1d08f315ecc5d11333f863bbc5824647063321eefa241973f7933e7",
+  "modifications": "Upstream source is unmodified. Vite bundles it as a separate dynamically imported worker module."
+}
