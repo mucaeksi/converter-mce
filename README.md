@@ -155,11 +155,15 @@ panelden çıkış/iptal bunu temizler. CSV→JSON akışının JS boyutu yakla�
 - [Ürün planı](docs/PLAN.tr.md)
 - [Cloudflare kararları](docs/CLOUDFLARE.tr.md)
 - [Skill kaynakları ve hash kayıtları](docs/skills-manifest.json)
+- [Seçilen ECC skill'leri ve kullanım kuralları](docs/ECC.tr.md)
 - [Resmi Workers sınırları](https://developers.cloudflare.com/workers/platform/limits/)
 - [Resmi Containers başlangıcı](https://developers.cloudflare.com/containers/get-started/)
 
 Graphify ve altı Ponytail skill'i `.agents/skills` altında lisansları korunarak
 bulunur. Graphify CLI, global hook'lar veya harici model analizi etkinleştirilmedi.
+ECC'den projeye uygun altı skill ayrıca eklendi: React/performans, erişilebilirlik,
+Playwright, Kotlin coroutines, güvenlik ve doğrulama. Sonraki geliştirmelerde
+hangi skill'in okunup uygulanacağı kök [AGENTS.md](AGENTS.md) içinde tanımlıdır.
 
 Üçüncü taraf bağımlılık bildirimleri: [THIRD-PARTY-NOTICES.txt](public/THIRD-PARTY-NOTICES.txt).
 Bu dosya sabit lockfile sürümlerinin dağıtılan lisans metinlerini içerir.
