@@ -1,39 +1,47 @@
 # Converter MCE
 
 Ücretsiz web ve Android dönüştürme uygulamasının ilk çalışan geliştirme sürümü.
-GitHub yalnızca kaynak deposudur. Üretim web/API, dosyalar, işler, veritabanı ve
-dönüştürme süreçleri Cloudflare üzerinde çalışacak şekilde hazırlanmıştır.
+GitHub yalnızca kaynak deposudur. Web/API Cloudflare üzerinde, dönüşümler tarayıcıda ve Android cihazında çalışır.
+Etkin olmayan sunucu işleme taslağı ayrıca depoda korunur.
 
 ## Şu anda çalışan kapsam
 
 - Web: PNG/JPEG girişinden JPEG, PNG veya WebP; kalite ve en fazla genişlik seçimi.
 - Webde cihaz içi dönüşüm: arka plan işçisinde çalışır, dosya yüklemez.
-- Sunucu akışı: Worker → özel R2 → Queues → Container → doğrulanmış çıktı → indirme.
-- D1 üzerinde sahiplik, idempotency, atomik günlük kota, iş durumları ve yeniden deneme.
-- İlk limitler: 10 MB, 8 megapiksel, günlük 5 başarılı/ayrılmış sunucu işi;
+- Web PDF: birleştirme, sayfa çıkarma/sıralama ve döndürme; en fazla 200 çıktı sayfası.
+- Web veri: CSV/TSV/JSON/XLSX değer dönüşümleri ve Excel çalışma sayfası seçimi.
+- Web ses: tarayıcının çözebildiği dosyadan WAV; kesme, örnekleme ve ses seviyesi.
+- Web video: desteklenen codec’lerde kısa video → WebM; kesme ve boyutlandırma.
+- Sunucu taslağı (yerel testlerde çalışır, üretimde kapalı): Worker → özel R2 → Queues → Container → doğrulanmış çıktı → indirme.
+- Sunucu taslağında D1 üzerinde sahiplik, idempotency, atomik günlük kota, iş durumları ve yeniden deneme.
+- Görüntüler 10 MB/8 MP; etkin olmayan sunucu taslağında günlük 5 ayrılmış iş;
   başarısızlıklar kotayı serbest bırakır, toplam deneme sayısı günlük 20 ile sınırlıdır.
-- Sunucu dosyaları 24 saat sonunda erişime kapanır; beş dakikalık bakım görevi
+- Sunucu taslağında dosyalar 24 saat sonunda erişime kapanır; beş dakikalık bakım görevi
   fiziksel temizliği yapar. Kullanıcı daha önce silebilir. Silinen işler kotayı sıfırlamaz.
-- Android: native Kotlin/Compose, çevrimdışı PNG/JPEG → JPEG, kalite/boyut ayarı,
-  beyaz saydamlık arka planı ve sistem dosya seçiciyle kaydetme. Android 9 / API 28+.
+- Android: native Kotlin/Compose, çevrimdışı PNG/JPEG → JPEG/PNG/WebP, kalite/boyut ayarı,
+  JPEG için beyaz, PNG/WebP için saydamlık koruyan arka plan ve sistem dosya seçiciyle kaydetme. Android 9 / API 28+.
 
-Video, ses, PDF/Office, toplu işleme, reklam SDK'sı ve Android bulut girişi sonraki
-aşamalardır. Arayüzde henüz çalışmayan kategoriler “Yakında” olarak gösterilir.
-Hiçbir reklam/analitik SDK'sı veya bu proje için yeni ücretli plan etkin değildir.
-Play Store yayını yapılmadı.
+Tam Office→PDF, OCR, uzun/büyük medya, toplu işler, reklam SDK'sı ve Android'in
+belge/medya araçları sonraki aşamalardır. Tüm format çiftlerinin desteklendiği
+iddia edilmez. Veri dönüşümü biçimlendirmeyi korumaz ve formüllü Excel'i reddeder.
+PDF formları/imza alanları reddedilir. Codec ve kalite sınırlamaları arayüzde yazılıdır.
 
 **Canlı web:** https://converter-mce.sosyalstudio-06a486e459d2.workers.dev
 
-23 Ekim 2026 itibarıyla cihazda görüntü dönüşümü yayında ve canlı Chromium
-testinden geçti. Bu dağıtım `wrangler.web.jsonc` kullanır; dosya yüklemez.
-Sunucu modu kapalıdır. D1/R2/Queue kaynakları hazırdır; Containers için hesapta
-Workers Paid gerekir: aylık en az 5 ABD doları, kullanım ücretleri eklenebilir.
-Plan satın alınmadı; sunucu dönüşümü için ayrıca Access kurulumu ve canlı motor
-testi yapılacaktır.
+**Kalıcı bütçe kararı: Workers Free.** Yeni ücretli plan etkinleştirilmez.
+Üretim `wrangler.web.jsonc` kullanır; dönüşümler cihazda yapılır, dosya yüklenmez.
+Workers Free günlük 100.000 dinamik istek ve çağrı başına 10 ms CPU sağlar.
+Statik dosyalar ücretsiz/sınırsız asset yolundan sunulur; yalnızca küçük API'ler
+Worker'a gider. D1/R2/Queue yayına bağlı değildir. Containers ücretsiz kapsamda
+olmadığından kullanılmaz. [Ücretsiz plan ve limitler](docs/FREE-PLAN.tr.md).
+Reklam ve Play Store yayını henüz etkin değildir.
 
 ## Geliştirme ortamı
 
-Node 24.19+, Python 3.12+ ve çalışan yerel Docker gerekir. Mevcut checkout'u
+Ücretsiz web geliştirmesi için Node 24.19+ yeterlidir. `npm run build` ardından
+`npx wrangler dev --config wrangler.web.jsonc --ip 127.0.0.1 --port 8790` kullanılabilir.
+Referans sunucu taslağını da çalıştıran aşağıdaki akış için Python 3.12+ ve
+çalışan yerel Docker gerekir. Mevcut checkout'u
 kullanın; bulut görevleri zaten yalıtılmıştır, ayrıca Git worktree oluşturmayın.
 
 ```sh
@@ -55,7 +63,7 @@ Normal Docker süreçleri ve gerçek görüntü dönüşümü çalışıyor.
 
 Destekleyen başka bir makinede native Cloudflare Containers emülasyonu için
 `CONVERTER_NATIVE_CONTAINERS=1 npm run dev` kullanılabilir. Bu native mod mevcut
-makinede doğrulanamadı. Üretimde her zaman Cloudflare Containers binding'i kullanılır;
+makinede doğrulanamadı. Etkin olmayan sunucu yapılandırması Cloudflare Containers binding'i kullanır;
 yerel motor adresi yalnızca `APP_ENV=development` durumunda ve sabit loopback URL'de kabul edilir.
 
 Python wheel'i resmi PyPI dosyasından indirilir ve sabit SHA-256 ile doğrulanır.
@@ -86,10 +94,11 @@ Play internal test doğrulaması ayrıca gerekir. APK ve build çıktıları Git
 npm run build
 npm test
 npm run test:e2e
+npm run test:free
 npm run test:engine
 npm run android:debug
 node scripts/android-gradle.mjs lintDebug
-npx wrangler deploy --dry-run --outdir dist-worker
+npx wrangler deploy --config wrangler.web.jsonc --dry-run --outdir dist-worker/free
 ```
 
 Worker testleri gerçek yerel D1/R2 üzerinde çalışır; motor sınırını mock'lar.
@@ -102,55 +111,35 @@ Playwright varsayılan olarak `/usr/bin/chromium` kullanır; farklı bir kurulum
 
 ## Cloudflare'a dağıtım
 
-`CLOUDFLARE_API_TOKEN` ve `CLOUDFLARE_ACCOUNT_ID` Codex ortam ayarlarından
-sağlandı; hesap erişimi ve token'ın aktif olduğu doğrulandı. Token'ı Git'e,
-chat'e, `.dev.vars` içine veya komut argümanlarına kopyalamayın.
-
-Hesapta gerekli hizmetler: Workers/Containers/Durable Objects, D1, R2 ve Queues.
-Kullanıcı ücretsizliği Cloudflare faturası olmadığı anlamına gelmez; hesap planı,
-Containers kullanılabilirliği ve bütçe sınırları yeni ücretli plan açılmadan kontrol edilir.
-
-Bu hesapta aşağıdaki kaynaklar zaten oluşturuldu; tekrar oluşturmayın:
-
-- D1 `converter-mce`: gerçek kimliği `wrangler.jsonc` içinde; migration uygulandı.
-- R2 `converter-mce-files`: public erişim kapalı; `jobs/` için bir günlük nesne
-  silme ve yarım kalan multipart yüklemeleri sonlandırma kuralı doğrulandı.
-- Queue `converter-mce-jobs`: oluşturuldu; tam sunucu dağıtımına kadar tüketici yok.
-
-Yalnızca cihazda dönüşüm sunan mevcut yayını güncellemek için `npm run deploy:web`
-kullanın. Bu yapılandırma yalnızca statik varlıkları bağlar; sunucu API'si 503
-döndürür. Tam yapılandırmayla aynı Worker adını kullanır, dolayısıyla sunucu
-özellikleri etkinleştirildiğinde adres değişmez. Hesaptaki diğer proje kaynakları
-değiştirilmedi.
-
-İlk kontrollü bulut beta'sında kimlik Cloudflare Access ile doğrulanır. Uygulama
-host'unun `/api/*` yolları için Access uygulaması ve email OTP erişim politikası
-oluşturun. `ACCESS_TEAM_DOMAIN` (yalnızca `ekip.cloudflareaccess.com`) ve
-`ACCESS_AUD` değerlerini Worker `vars` alanına ekleyin. JWT imzası, issuer, audience
-ve süre kontrol edilir; istemciden gelen bir kimlik başlığı tek başına kabul edilmez.
-Web arayüzü kimlik gerektirmeyen `/.well-known/converter-capabilities` bilgisini okuyabilir. Sunucu oturumu bağlantısı `/api/login` üzerinden Access girişine gider ve giriş sonrası panele döner. Access yapılandırması eksikse bulut API'si kapalı kalır; cihaz içi araç çalışabilir.
-Herkese açık SaaS'a açılmadan Access kullanıcı/plan sınırları ve Android oturum
-akışı gerçek hesapta değerlendirilmelidir.
+`CLOUDFLARE_API_TOKEN` ve `CLOUDFLARE_ACCOUNT_ID` güvenli Codex ayarlarında hazır.
+Hesap token'ı aktif; sırlar kaynak kodda veya komut argümanlarında saklanmaz.
 
 ```sh
-npx wrangler d1 migrations apply DB --remote
 npm run deploy
 ```
 
-`deploy` token/hesap/D1 önkoşullarını kontrol eder; imajı hazırlar ve build'i çalıştırır.
-Eksik erişimle kaynak oluşturduğunu veya deploy yaptığını iddia etmez. Dağıtımdan
-sonra gerçek Access girişi, bir dönüşüm, hesaplar arası erişim reddi, silme ve cron
-temizliği tekrar doğrulanmalıdır. `--dry-run` bu canlı kontrollerin yerine geçmez.
+Varsayılan komut `deploy:web` çalıştırır: build ve `wrangler.web.jsonc` dağıtımı.
+Statik güvenlik başlıkları `public/_headers` içindedir. `/api/*` ve `/.well-known/*`
+Worker'a gider; bulut işi API'si 503 döndürür. Ücretli sunucu planı açılmaz.
 
-Otomatik dağıtım için GitHub deposu Cloudflare Workers Builds'e bağlanır;
-Node sürümü 24.19.0, build komutu `npm ci && npm run prepare:engine && npm run build`,
-deploy komutu tam sunucu sürümünde `npx wrangler deploy`, mevcut cihaz sürümünde
-`npx wrangler deploy --config wrangler.web.jsonc` olur. Container build desteği ve Docker bu
-hesabın build ortamında doğrulanmalıdır. GitHub Actions veya GitHub üzerinde
-çalışan uygulama servisi yoktur. Android release build/AAB ve R2 artefakt hattı
-ayrı bir Cloudflare build işi olarak sonraki aşamada kurulacaktır.
-Workers Builds GitHub bağlantısı henüz kurulmadı; mevcut yayın Codex'ten
-Wrangler ile doğrudan Cloudflare'a dağıtıldı.
+Daha önce D1 `converter-mce`, özel R2 `converter-mce-files` ve Queue
+`converter-mce-jobs` oluşturuldu. Migration ve R2 `jobs/` bir günlük lifecycle
+kuralı uygulandı. Kaynaklar mevcut üretime bağlı değildir; tekrar oluşturmayın.
+Hesaptaki başka projeler ve önceden var olan abonelikler değiştirilmedi.
+`wrangler.jsonc`, Access/sunucu kodu ve Docker akışı yalnızca yerel doğrulama ve
+referans olarak korunur; güncel ücretsiz üretime dağıtılmaz.
+
+GitHub kaynaklı Cloudflare Workers Builds bağlantısı henüz kurulmadı. Kurulunca
+ücretsiz web build komutu `npm ci && npm run build`, deploy komutu
+`npx wrangler deploy --config wrangler.web.jsonc` olmalıdır. Container wheel'i,
+Docker ve GitHub Actions çalışma zamanı bu ücretsiz yayın için gerekmez.
+Mevcut yayın Codex'ten Wrangler ile doğrudan Cloudflare'a yapılır.
+
+Canlı web araçlarının gerçek Chromium kontrolü:
+
+```sh
+CONVERTER_TEST_URL=https://converter-mce.sosyalstudio-06a486e459d2.workers.dev npx playwright test --config playwright.free.config.ts
+```
 
 ## Kaynaklar
 
@@ -162,3 +151,6 @@ Wrangler ile doğrudan Cloudflare'a dağıtıldı.
 
 Graphify ve altı Ponytail skill'i `.agents/skills` altında lisansları korunarak
 bulunur. Graphify CLI, global hook'lar veya harici model analizi etkinleştirilmedi.
+
+Üçüncü taraf bağımlılık bildirimleri: [THIRD-PARTY-NOTICES.txt](public/THIRD-PARTY-NOTICES.txt).
+Bu dosya sabit lockfile sürümlerinin dağıtılan lisans metinlerini içerir.

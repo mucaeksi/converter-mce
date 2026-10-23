@@ -26,7 +26,7 @@ class ImageConverterTest {
         source.eraseColor(Color.TRANSPARENT)
         val input = ByteArrayOutputStream().use { stream -> source.compress(Bitmap.CompressFormat.PNG, 100, stream); stream.toByteArray() }
         source.recycle()
-        val result = ImageConverter.convertToJpeg(input, 85, 40)
+        val result = ImageConverter.convert(input, 85, 40)
         assertEquals(40, result.width)
         assertEquals(20, result.height)
         assertEquals(0xff, result.bytes[0].toInt() and 0xff)
@@ -39,9 +39,27 @@ class ImageConverterTest {
     }
 
     @Test fun rejectsInvalidInputAndMemoryBombs() {
-        assertThrows(IllegalArgumentException::class.java) { ImageConverter.convertToJpeg(byteArrayOf(1, 2, 3)) }
+        assertThrows(IllegalArgumentException::class.java) { ImageConverter.convert(byteArrayOf(1, 2, 3)) }
         assertThrows(IllegalArgumentException::class.java) { ImageConverter.dimensions(50_000, 50_000, null) }
         assertThrows(IllegalArgumentException::class.java) { ImageConverter.dimensions(80, 40, 0) }
         assertThrows(IllegalArgumentException::class.java) { ImageConverter.readInput(ByteArrayInputStream(ByteArray(ImageConverter.MAX_INPUT_BYTES + 1))) }
+    }
+
+    @Test fun pngAndWebpPreserveTransparencyAndMatchMime() {
+        val source = Bitmap.createBitmap(80, 40, Bitmap.Config.ARGB_8888)
+        source.eraseColor(Color.TRANSPARENT)
+        val input = ByteArrayOutputStream().use { stream -> source.compress(Bitmap.CompressFormat.PNG, 100, stream); stream.toByteArray() }
+        source.recycle()
+        for (format in listOf(ImageOutput.PNG, ImageOutput.WEBP)) {
+            val result = ImageConverter.convert(input, 85, 40, format)
+            val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+            BitmapFactory.decodeByteArray(result.bytes, 0, result.bytes.size, bounds)
+            assertEquals(format.mime, bounds.outMimeType)
+            val decoded = BitmapFactory.decodeByteArray(result.bytes, 0, result.bytes.size)
+            assertEquals(40, decoded.width)
+            assertEquals(20, decoded.height)
+            assertEquals(0, Color.alpha(decoded.getPixel(1, 1)))
+            decoded.recycle()
+        }
     }
 }

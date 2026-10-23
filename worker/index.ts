@@ -53,7 +53,7 @@ async function owner(request: Request, env: Env): Promise<string> {
     return digest(cookie);
   }
   if (!env.ACCESS_TEAM_DOMAIN || !env.ACCESS_AUD || !/^[a-z0-9-]+\.cloudflareaccess\.com$/.test(env.ACCESS_TEAM_DOMAIN)) {
-    throw new ApiError(503, 'Sunucu dönüşümleri hesap erişimi yapılandırılınca açılacak. Cihazda dönüştürmeyi kullanabilirsiniz.');
+    throw new ApiError(503, 'Bu sürümde sunucu dönüşümü kapalı. Cihazda dönüştürmeyi kullanabilirsiniz.');
   }
   const assertion = request.headers.get('cf-access-jwt-assertion');
   if (!assertion) throw new ApiError(401, 'Sunucu dönüşümü için oturum açın.');
@@ -265,7 +265,7 @@ export default {
     secured.headers.set('X-Content-Type-Options', 'nosniff');
     secured.headers.set('Referrer-Policy', 'no-referrer');
     secured.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
-    secured.headers.set('Content-Security-Policy', "default-src 'self'; img-src 'self' blob: data:; style-src 'self'; script-src 'self'; connect-src 'self'; worker-src 'self' blob:; frame-ancestors 'none'; base-uri 'none'; form-action 'self'");
+    secured.headers.set('Content-Security-Policy', "default-src 'self'; img-src 'self' blob: data:; media-src 'self' blob:; style-src 'self'; script-src 'self'; connect-src 'self'; worker-src 'self' blob:; frame-ancestors 'none'; base-uri 'none'; form-action 'self'");
     if (new URL(request.url).pathname.startsWith('/api/')) secured.headers.set('Cache-Control', 'no-store');
     return secured;
   },

@@ -33,6 +33,7 @@ class MainActivity : ComponentActivity() {
     private fun Converter() {
         var selected by remember { mutableStateOf<Uri?>(null) }
         var quality by remember { mutableFloatStateOf(85f) }
+        var format by remember { mutableStateOf(ImageOutput.JPEG) }
         var maxWidth by remember { mutableStateOf("") }
         var result by remember { mutableStateOf<ConvertedImage?>(null) }
         var message by remember { mutableStateOf("PNG veya JPEG seçerek başlayın.") }
@@ -41,7 +42,7 @@ class MainActivity : ComponentActivity() {
         val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
             if (uri != null) { selected = uri; result = null; message = "Dosya seçildi. Cihazınızda dönüştürmeye hazır." }
         }
-        val save = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("image/jpeg")) { uri ->
+        val save = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument(result?.format?.mime ?: format.mime)) { uri ->
             val converted = result
             if (uri != null && converted != null) scope.launch {
                 try {
@@ -61,13 +62,18 @@ class MainActivity : ComponentActivity() {
             Card(colors = CardDefaults.cardColors(containerColor = Color.White)) {
                 Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
                     Text("01  Dosyanı seç", style = MaterialTheme.typography.titleMedium)
-                    Text("PNG / JPEG → JPG\nEn fazla 10 MB ve 8 megapiksel", style = MaterialTheme.typography.bodySmall)
+                    Text("PNG / JPEG → JPG, PNG, WebP\nEn fazla 10 MB ve 8 megapiksel", style = MaterialTheme.typography.bodySmall)
                     OutlinedButton(onClick = { picker.launch(arrayOf("image/png", "image/jpeg")) }, enabled = !busy) { Text(if (selected == null) "Dosya seç" else "Dosyayı değiştir") }
                     Text("02  Çıktını ayarla", style = MaterialTheme.typography.titleMedium)
-                    Text("JPEG kalitesi: ${quality.toInt()}%")
-                    Slider(value = quality, onValueChange = { quality = it; result = null }, valueRange = 10f..95f, enabled = !busy)
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        ImageOutput.entries.forEach { option ->
+                            FilterChip(selected = format == option, onClick = { format = option; result = null }, label = { Text(option.name) }, enabled = !busy)
+                        }
+                    }
+                    Text(if (format == ImageOutput.PNG) "PNG · Kayıpsız" else "Görüntü kalitesi: ${quality.toInt()}%")
+                    Slider(value = quality, onValueChange = { quality = it; result = null }, valueRange = 10f..95f, enabled = !busy && format != ImageOutput.PNG)
                     OutlinedTextField(value = maxWidth, onValueChange = { maxWidth = it; result = null }, label = { Text("En fazla genişlik (isteğe bağlı)") }, suffix = { Text("px") }, singleLine = true, enabled = !busy)
-                    Text("En-boy oranı korunur. Saydam alanlar beyaz olur. Kaynak metadata kaldırılır.", style = MaterialTheme.typography.bodySmall)
+                    Text("En-boy oranı korunur. JPEG saydam alanları beyaz yapar; PNG ve WebP saydamlığı korur. Kaynak metadata kaldırılır.", style = MaterialTheme.typography.bodySmall)
                     Button(modifier = Modifier.fillMaxWidth(), enabled = selected != null && !busy, onClick = {
                         scope.launch {
                             busy = true; result = null; message = "Cihazınızda dönüştürülüyor…"
@@ -77,7 +83,7 @@ class MainActivity : ComponentActivity() {
                                     val stream = contentResolver.openInputStream(selected!!) ?: error("Dosya açılamadı.")
                                     stream.use { ImageConverter.readInput(it) }
                                 }
-                                result = withContext(Dispatchers.Default) { ImageConverter.convertToJpeg(bytes, quality.toInt(), width) }
+                                result = withContext(Dispatchers.Default) { ImageConverter.convert(bytes, quality.toInt(), width, format) }
                                 message = "Hazır: ${result!!.width} × ${result!!.height} px · ${result!!.bytes.size / 1024} KB"
                             } catch (e: Exception) { message = e.message ?: "Görüntü açılamadı." }
                             finally { busy = false }
@@ -86,7 +92,7 @@ class MainActivity : ComponentActivity() {
                 }
             }
             Text(message, style = MaterialTheme.typography.bodyMedium)
-            if (result != null) Button(onClick = { save.launch("converter-mce.jpg") }, modifier = Modifier.fillMaxWidth()) { Text("JPEG dosyasını kaydet ↓") }
+            if (result != null) Button(onClick = { save.launch("converter-mce.${result!!.format.extension}") }, modifier = Modifier.fillMaxWidth()) { Text("${result!!.format.name} dosyasını kaydet ↓") }
             Spacer(Modifier.height(12.dp))
             Text("Dosyalarınız cihazınızda kalır. Bu geliştirme sürümünde reklam ve bulut yüklemesi etkin değildir.", style = MaterialTheme.typography.bodySmall)
         }

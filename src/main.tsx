@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { imageHeader, MAX_INPUT_BYTES, parseOptions, type Job, type Options, type OutputFormat } from '../shared/conversion';
 import './style.css';
+import { DocumentTools } from './DocumentTools';
+import { MediaTools } from './MediaTools';
 
 type Result = { blob: Blob; width: number; height: number };
 const sizes = (bytes: number) => bytes < 1024 * 1024 ? `${(bytes / 1024).toFixed(1)} KB` : `${(bytes / 1024 / 1024).toFixed(1)} MB`;
@@ -15,6 +17,7 @@ async function responseJson<T>(response: Response): Promise<T> {
 }
 
 function App() {
+  const [tool, setTool] = useState<'image' | 'pdf' | 'table' | 'audio' | 'video'>('image');
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState('');
   const [result, setResult] = useState<Result | null>(null);
@@ -125,16 +128,17 @@ function App() {
     <aside className="sidebar">
       <a className="brand" href="/" aria-label="Converter MCE ana sayfa"><span className="brand-mark">↔</span><span>converter<span className="brand-suffix">mce</span></span></a>
       <p className="nav-caption">ÇALIŞMA ALANI</p>
-      <nav aria-label="Araç kategorileri"><a href="#workspace" className="nav-active"><span>▧</span> Görüntü araçları <span className="nav-dot" /></a>
-        {['Video araçları', 'Ses araçları', 'PDF ve belgeler', 'Excel ve veri'].map((name, i) => <div className="nav-pending" key={name}><span>{['▷', '♫', '▤', '▦'][i]}</span>{name}<small>Yakında</small></div>)}
+      <nav aria-label="Araç kategorileri">{([['image', '▧', 'Görüntü araçları'], ['pdf', '▤', 'PDF ve belgeler'], ['table', '▦', 'Excel ve veri'], ['audio', '♫', 'Ses araçları'], ['video', '▷', 'Video araçları']] as const).map(([id, icon, name]) => <a key={id} href="#workspace" className={tool === id ? 'nav-active' : ''} aria-current={tool === id ? 'page' : undefined} onClick={e => { if (busy) e.preventDefault(); else setTool(id); }}><span>{icon}</span>{name}{tool === id && <span className="nav-dot" />}</a>)}
       </nav>
       <div className="sidebar-note"><span>◇</span><strong>Dosyalarınız size ait.</strong><p>Cihazda işleme modunda dosyanız sunucuya gönderilmez.</p></div>
       <div className="sidebar-bottom"><span className="avatar">M</span><div>Herkes için ücretsiz<small>İlk geliştirme sürümü</small></div></div>
     </aside>
     <main id="workspace">
-      <header><span>Araçlar <span className="breadcrumb">/</span> Görüntü dönüştürücü</span><span className="free-badge">● Ücretsiz</span></header>
+      <header><span>Araçlar <span className="breadcrumb">/</span> {{ image: 'Görüntü dönüştürücü', pdf: 'PDF araçları', table: 'Excel ve veri', audio: 'Ses araçları', video: 'Video araçları' }[tool]}</span><span className="free-badge">● Ücretsiz</span></header>
       <div className="workspace-content">
-        <div className="intro"><span className="eyebrow">DAHA AZ UĞRAŞ, DAHA FAZLA İMKÂN</span><h1>Dosyalarına yeni<br />bir biçim ver<span>.</span></h1><p>Fotoğrafını ekle, istediğin biçimi seç.<br />Gerisini bize bırak — ya da doğrudan cihazında hallet.</p></div>
+        <div className="intro"><span className="eyebrow">DAHA AZ UĞRAŞ, DAHA FAZLA İMKÂN</span><h1>Dosyalarına yeni<br />bir biçim ver<span>.</span></h1><p>Dosyanı seç, dönüştür ve indir.<br />Ücretsiz araçlar doğrudan cihazında çalışır.</p></div>
+        <div className="tool-tabs" role="group" aria-label="Dönüştürme aracı">{([['image', 'Görüntü'], ['pdf', 'PDF'], ['table', 'Excel / Veri'], ['audio', 'Ses'], ['video', 'Video']] as const).map(([id, label]) => <button key={id} disabled={busy} aria-pressed={tool === id} onClick={() => setTool(id)}>{label}</button>)}</div>
+        {tool === 'audio' || tool === 'video' ? <MediaTools kind={tool} key={tool} /> : tool !== 'image' ? <DocumentTools kind={tool} key={tool} /> : <>
         <div className="workspace-grid">
           <section className="file-panel" aria-labelledby="file-title">
             <div className="panel-heading"><h2 id="file-title"><span className="step">01</span> Dosyanı ekle</h2><span className="muted">PNG · JPEG</span></div>
@@ -157,7 +161,7 @@ function App() {
               <div className="range-labels"><span>Daha küçük dosya</span><span>Daha yüksek kalite</span></div>
               <label className="field-label" htmlFor="width">En fazla genişlik <span className="optional">isteğe bağlı</span></label><div className="width-field"><input id="width" type="number" min="1" max="4096" placeholder="Orijinal boyut" value={width} onChange={(e) => { setWidth(e.target.value); invalidate(); }} /><span>px</span></div>
               <p className="field-hint">En-boy oranı korunur. Küçük görseller büyütülmez.</p>
-              <label className="field-label" htmlFor="mode">İşleme yöntemi</label><select id="mode" value={mode} onChange={(e) => { setMode(e.target.value as 'device' | 'cloud'); invalidate(); }}><option value="device">Cihazımda · özel ve hızlı</option><option value="cloud" disabled={serverAuth === 'unconfigured'}>Sunucuda{serverAuth === 'unconfigured' ? ' · kurulum bekliyor' : ' · 5 ücretsiz iş / gün'}</option></select>
+              {serverAuth !== 'unconfigured' ? <><label className="field-label" htmlFor="mode">İşleme yöntemi</label><select id="mode" value={mode} onChange={(e) => { setMode(e.target.value as 'device' | 'cloud'); invalidate(); }}><option value="device">Cihazımda · özel ve hızlı</option><option value="cloud">Sunucuda · 5 ücretsiz iş / gün</option></select></> : <p className="field-hint">Ücretsiz sürümde dosyalarınız cihazınızda dönüştürülür.</p>}
               {mode === 'cloud' && serverAuth === 'access' && <a className="text-button" href="/api/login">Sunucu için güvenli oturum aç →</a>}
               <p className="field-hint">{format === 'jpeg' ? 'JPG saydamlığı desteklemez; arka plan beyaz olur.' : 'Dönüşümde EXIF ve diğer kaynak metadata kaldırılır.'}</p>
             </fieldset>
@@ -170,7 +174,8 @@ function App() {
           {job && !busy && <button className="text-button" onClick={() => void removeServerCopy()}>Sunucu kopyalarını şimdi sil</button>}</div>
           {resultUrl ? <div className="result-actions"><img src={resultUrl} alt="Dönüştürülmüş görüntünün önizlemesi" /><a className="button-primary" href={resultUrl} download={`${file?.name.replace(/\.[^.]+$/, '') ?? 'converter'}.${result?.blob.type === 'image/jpeg' ? 'jpg' : result?.blob.type.split('/')[1]}`}>Dosyayı indir <span>↓</span></a></div> : <div className="result-placeholder" aria-hidden="true">→</div>}
         </section>
-        <footer><span>Converter MCE <span className="footer-dot">·</span> Dosyalarınla özgürce çalış.</span><span>İlk sürüm · Görüntü araçları</span></footer>
+        </>}
+        <footer><span>Converter MCE <span className="footer-dot">·</span> Dosyalarınla özgürce çalış.</span><span>Cihazda ücretsiz dönüşüm</span></footer>
       </div>
     </main>
   </div>;

@@ -1,6 +1,15 @@
 # Converter MCE — ücretsiz, reklam destekli web ve Android ürün planı
 
-Durum: Planlama taslağı. Kullanıcı tercihleri: başlangıçtan itibaren herkese açık hizmet; web paneli ve Play Store'da Android uygulaması; tamamen ücretsiz kullanım ve az sayıda reklam; GitHub yalnızca kaynak deposu, tüm sunucu altyapısı Cloudflare. Önceki abonelik/ücretli kredi ve bağımsız sunucu önerileri kaldırıldı. İlk görüntü dönüştürme uygulaması geliştirildi; canlı Cloudflare/Play Store yayını yapılmadı.
+Durum: Planlama taslağı. Kullanıcı tercihleri: başlangıçtan itibaren herkese açık hizmet; web paneli ve Play Store'da Android uygulaması; tamamen ücretsiz kullanım ve az sayıda reklam; GitHub yalnızca kaynak deposu, tüm sunucu altyapısı Cloudflare. Önceki abonelik/ücretli kredi ve bağımsız sunucu önerileri kaldırıldı. Cihazda dönüşüm yapan web sürümü Cloudflare’da yayında; Android debug APK hazır, Play Store yayını yapılmadı.
+
+## 0. Güncel ücretsiz altyapı kararı
+
+Kullanıcı Cloudflare Workers Free planında kalmayı belirledi. Bu karar aşağıdaki
+eski sunucu/beta tasarımlarının önüne geçer. Ücretli Containers etkinleştirilmez;
+R2/D1/Queue mevcut yayına bağlı değildir. Varsayılan dağıtım cihazda dönüşüm yapan
+`wrangler.web.jsonc` sürümüdür. Güncel sınırlar ve kapsam [FREE-PLAN.tr.md](FREE-PLAN.tr.md)
+ve [README](../README.md) içindedir. Bulut işçisi, reklam karşılığı bulut kotası,
+Access beta ve sunucu benchmark bölümleri etkin olmayan referans tasarımlardır.
 
 ## 1. Ürün hedefi ve doğruluk sözleşmesi
 
@@ -50,23 +59,18 @@ Tablo hedef kapsamıdır; henüz çalıştığı doğrulanmış format listesi d
 
 ## 4. Seçilen Cloudflare yapısı
 
-Son kullanıcı kararı bu bölümdeki teknoloji seçimini belirler: GitHub yalnızca kod deposudur; tüm sunucu bileşenleri Cloudflare üzerinde çalışır. Ayrıntı ve mevcut sınırlamalar [Cloudflare kararlarında](CLOUDFLARE.tr.md), çalıştırma adımları [README](../README.md) içindedir.
+- Web: React/TypeScript/Vite, ücretsiz Workers Static Assets.
+- API: yalnızca küçük health/capabilities yanıtları için Workers Free.
+- Dönüşüm: tarayıcı Web Worker, Web Audio/MediaRecorder ve yerel kütüphaneler.
+- Android: native Kotlin/Compose ve cihaz codec'leri; sunucu gerektirmez.
+- Depolama: girdiler/çıktılar cihazda; üretim R2'ye yüklemez.
+- GitHub: yalnızca kaynak deposu; yayın Cloudflare'a. Workers Builds bağlantısı henüz kurulmadı.
+- Sunucu taslağı: D1/R2/Queues/Containers kodu yerelde test edilebilir, üretimde kapalıdır.
+- Reklam: sonraki aşama; önce test kimlikleri ve gereken izin/gizlilik akışı.
 
-- Web: React + TypeScript + Vite; Workers Static Assets. İlk araçlar SEO/SSR gerektirmediğinden Next.js yerine statik panel seçildi.
-- Android: Kotlin + Jetpack Compose, cihaz içi dönüşüm ve ortak API sözleşmesi.
-- API: TypeScript Cloudflare Worker; FastAPI sunucusu yok.
-- Veritabanı: Cloudflare D1; PostgreSQL hizmeti yok.
-- Kuyruk: Cloudflare Queues; Redis/Celery hizmeti yok.
-- Dosyalar: özel Cloudflare R2; süreli erişim, sahiplik kontrolü ve silme.
-- Motor: Cloudflare Containers + Durable Objects; normal Workers CPU/bellek sınırlarının dışında ağır işlem.
-- Kimlik: ilk kontrollü bulut beta'sında Cloudflare Access JWT doğrulaması; genel SaaS/Android oturumu canlı hesapta ayrıca doğrulanır.
-- İş kurtarma/temizlik: D1 outbox/lease + Cron Triggers.
-- İzleme: Cloudflare Workers/Containers Logs; müşteri dosyaları ve parolalar loglanmaz.
-- Build/yayın: GitHub kaynaklı Cloudflare Workers Builds; GitHub Actions üzerinde çalışma yok.
-- Android release build ve R2 artefakt hattı sonraki Cloudflare build işi olacak. Şu an APK bu geliştirme ortamında derlenir.
-- Reklam: Android için resmi Google Mobile Ads entegrasyonu ve web reklam ağı daha sonraki aşamada, izin akışı ve test kimlikleriyle eklenecek.
-
-İlk geliştirme sürümü: PNG/JPEG girişleri, webde JPEG/PNG/WebP çıktısı, Android'de JPEG; kalite ve genişlik ayarı. Limit 10 MB / 8 megapiksel. Video/PDF/Office ve reklamlar halen yol haritasındadır. Native Wrangler Container emülasyonu bu makinenin kernel eksiğiyle engellidir; yerel doğrulama aynı imajı ağ kapalı Docker sürecinde çalıştırır. Üretimde yalnızca Cloudflare Container binding'i kullanılır.
+Webde görüntü, PDF, tablo, ses ve kısa video araçları; Android'de görüntü araçları
+bulunur. Yalnızca test edilen yönler destek olarak sunulur. Büyük video, tam Office,
+ağır OCR ve AI için sıfır sunucu bütçesiyle genel destek garantisi verilmez.
 
 ## 5. Dönüştürme motorları ve kaynakları
 
@@ -139,7 +143,7 @@ Reklam geliri = gösterim / 1000 × gerçekleşen eCPM. Başa baş hesabı; fill
 
 İlk benchmark ortamı için öneri: GPU olmadan toplam 4–8 vCPU ve 8–16 GB RAM; küçük hizmetler ve medya işçisi gerektiğinde ayrı makineler. Bu kapasite vaadi değildir. Büyük video, OCR ve Office eşzamanlılığı ölçülerek ayarlanır. RAM ve CPU'yu aşan varsayılan worker sayısı kullanılmaz.
 
-Trafik ve dosya örnekleri bilinmediğinden aylık bütçe veya kullanıcı kapasitesi doğrulanmış gibi verilmez. Yayın öncesi küçük/orta/büyük örneklerde p50/p95 süre, RAM tepesi, başarı ve birim maliyet raporu hazırlanır. Bütçe eşiği, kuyruk üst sınırı ve kullanıcı başına günlük kaynak sınırı bulunur. Kullanıcıya ücretsiz hizmetin işletmeci için sunucu, depolama, mağaza hesabı ve operasyon maliyetleri olabilir. Barındırma/reklam sağlayıcısı seçilmedi; ücretli kaynak açılmadı.
+Trafik ve dosya örnekleri bilinmediğinden aylık bütçe veya kullanıcı kapasitesi doğrulanmış gibi verilmez. Yayın öncesi küçük/orta/büyük örneklerde p50/p95 süre, RAM tepesi, başarı ve birim maliyet raporu hazırlanır. Bütçe eşiği, kuyruk üst sınırı ve kullanıcı başına günlük kaynak sınırı bulunur. Kullanıcıya ücretsiz hizmetin işletmeci için sunucu, depolama, mağaza hesabı ve operasyon maliyetleri olabilir. Barındırma Cloudflare Workers Free olarak seçildi; yeni ücretli abonelik açılmadı. Reklam entegrasyonu henüz yok.
 
 ## 10. Skill ve geliştirme altyapısı
 
@@ -215,11 +219,14 @@ Varsayılan çalışma kararı: Android'de yerel işlem önceliği ve misafir ku
 - Resmi AndroidX Media3 README/Transformer kaynağı ve Google reklam örnekleri incelendi. Eski google-mobile-android-examples deposu kendisini legacy olarak işaretliyor ve GMA Next-Gen örneklerine yönlendiriyor. Güncel entegrasyon başlangıç noktası https://github.com/googleads/gma-next-gen-sdk-android-examples ; SDK sürümü uygulama sırasında resmi belgelerle sabitlenir.
 - GitHub HTML araması HTTP 429, GitHub API araması proxy 403 verdi. Bilinen resmi URL'ler ve izinli paket kayıtlarıyla araştırma sürdürüldü; ağ kısıtı aşılmadı veya genişletilmedi.
 - Kopyalanan skill dosyalarının kaynakla byte/hash eşleşmesi doğrulanır. Bu, skill davranışının çalıştırıldığı anlamına gelmez.
-- Bu bölüm ilk planlama oturumunun araştırma kaydıdır. Güncel çalışan kapsam ve canlıya geçiş engelleri README ve CLOUDFLARE.tr.md içindedir. İlk görüntü uygulaması ve Android debug build geliştirildi; üretim dağıtımı henüz yapılmadı. Ortam kurulum/başlatma yönergeleri doğrulama sonrasında yapılandırma taslağına kaydedilir.
+- Bu bölüm ilk planlama oturumunun araştırma kaydıdır. Güncel çalışan kapsam ve canlıya geçiş engelleri README ve CLOUDFLARE.tr.md içindedir. İlk görüntü uygulaması ve Android debug build geliştirildi; cihazda dönüşüm web sürümü Cloudflare’a dağıtıldı. Ortam kurulum/başlatma yönergeleri doğrulama sonrasında yapılandırma taslağına kaydedilir.
 
 ## 16. Bir sonraki somut teslimat
 
-İlk uygulama işi: web/API servislerini başlatan tekrarlanabilir geliştirme altyapısı ve Android uygulama iskeleti. Aynı PNG→JPEG örneği Android'de çevrimdışı seç/dönüştür/kaydet, webde ise kullanıcı sahipliği, yükleme, kuyruk, izole işleme, doğrulama, indirme ve silme adımlarıyla tamamlanır. İki akış kanıtlandıktan sonra medya, PDF ve tablo işlemleri eklenir; reklam entegrasyonu önce test kimlikleriyle gelir.
+Mevcut ücretsiz web araçlarının format/cihaz matrisini genişletme; Android'e
+belge ve medya araçlarını ekleme; ardından test reklamları, gizlilik/izin akışı,
+imzalı AAB ve Play internal test hazırlığı. Gerçek reklam yayıncı kimlikleri ve
+Play Console yetkisi gerektiğinde kullanıcıya ait hesaplardan sağlanır.
 
 ## 17. Android uygulaması ve Play Store teslimatı
 

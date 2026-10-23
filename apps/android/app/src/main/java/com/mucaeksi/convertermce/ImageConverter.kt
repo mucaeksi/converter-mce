@@ -10,7 +10,13 @@ import java.io.InputStream
 import java.nio.ByteBuffer
 import kotlin.math.roundToInt
 
-data class ConvertedImage(val bytes: ByteArray, val width: Int, val height: Int)
+@Suppress("DEPRECATION")
+enum class ImageOutput(val mime: String, val extension: String, val encoding: Bitmap.CompressFormat) {
+    JPEG("image/jpeg", "jpg", Bitmap.CompressFormat.JPEG),
+    PNG("image/png", "png", Bitmap.CompressFormat.PNG),
+    WEBP("image/webp", "webp", Bitmap.CompressFormat.WEBP)
+}
+data class ConvertedImage(val bytes: ByteArray, val width: Int, val height: Int, val format: ImageOutput)
 
 object ImageConverter {
     const val MAX_INPUT_BYTES = 10 * 1024 * 1024
@@ -34,7 +40,7 @@ object ImageConverter {
         return maxOf(1, (width * scale).roundToInt()) to maxOf(1, (height * scale).roundToInt())
     }
 
-    fun convertToJpeg(input: ByteArray, quality: Int = 85, maxWidth: Int? = null): ConvertedImage {
+    fun convert(input: ByteArray, quality: Int = 85, maxWidth: Int? = null, format: ImageOutput = ImageOutput.JPEG): ConvertedImage {
         require(input.isNotEmpty() && input.size <= MAX_INPUT_BYTES) { "Dosya boş veya 10 MB sınırını aşıyor." }
         require(quality in 10..95) { "Kalite 10–95 arasında olmalı." }
         val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
@@ -60,12 +66,15 @@ object ImageConverter {
         try {
             val output = Bitmap.createBitmap(decoded.width, decoded.height, Bitmap.Config.ARGB_8888)
             try {
-                Canvas(output).apply { drawColor(Color.WHITE); drawBitmap(decoded, 0f, 0f, null) }
+                Canvas(output).apply {
+                    if (format == ImageOutput.JPEG) drawColor(Color.WHITE)
+                    drawBitmap(decoded, 0f, 0f, null)
+                }
                 val bytes = ByteArrayOutputStream().use { stream ->
-                    check(output.compress(Bitmap.CompressFormat.JPEG, quality, stream)) { "JPEG oluşturulamadı." }
+                    check(output.compress(format.encoding, quality, stream)) { "Çıktı oluşturulamadı." }
                     stream.toByteArray()
                 }
-                return ConvertedImage(bytes, output.width, output.height)
+                return ConvertedImage(bytes, output.width, output.height, format)
             } finally { output.recycle() }
         } finally { decoded.recycle() }
     }

@@ -16,14 +16,20 @@
     "db:local": "wrangler d1 migrations apply DB --local",
     "test": "vitest run",
     "test:e2e": "playwright test",
+    "test:free": "npm run build && playwright test --config playwright.free.config.ts",
     "test:engine": "python3 scripts/test-engine.py",
-    "deploy": "node scripts/check-deploy.mjs && npm run prepare:engine && npm run build && wrangler deploy",
+    "deploy": "npm run deploy:web",
     "deploy:web": "npm run build && wrangler deploy --config wrangler.web.jsonc",
     "android:debug": "node scripts/android-gradle.mjs"
   },
   "dependencies": {
     "@cloudflare/containers": "0.3.7",
+    "exceljs": "4.4.0",
+    "fflate": "0.8.3",
+    "fix-webm-duration": "1.0.6",
     "jose": "6.2.13",
+    "papaparse": "5.7.0",
+    "pdf-lib": "1.17.1",
     "react": "19.3.1",
     "react-dom": "19.3.1"
   },
@@ -32,6 +38,7 @@
     "@cloudflare/workers-types": "5.20261023.1",
     "@playwright/test": "1.64.1",
     "@types/node": "24.19.2",
+    "@types/papaparse": "5.3.16",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
     "@vitejs/plugin-react": "6.1.2",
@@ -39,5 +46,10 @@
     "vite": "8.3.5",
     "vitest": "4.1.0",
     "wrangler": "4.152.0"
+  },
+  "overrides": {
+    "exceljs": {
+      "uuid": "11.1.1"
+    }
   }
 }
