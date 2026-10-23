@@ -2,7 +2,7 @@ import { defineConfig } from '@playwright/test';
 
 const external = process.env.CONVERTER_TEST_URL;
 export default defineConfig({
-  testDir: './tests/e2e', testMatch: ['documents.spec.ts', 'media.spec.ts', 'extensions.spec.ts'], workers: 1, timeout: 90_000,
+  testDir: './tests/e2e', testMatch: ['documents.spec.ts', 'media.spec.ts', 'extensions.spec.ts', 'batch-images.spec.ts'], workers: 1, timeout: 90_000,
   use: {
     baseURL: external || 'http://127.0.0.1:8790',
     launchOptions: {

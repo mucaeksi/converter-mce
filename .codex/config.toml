@@ -1,0 +1,13 @@
+# Project-scoped Codex review roles. Model, provider and runtime settings inherit.
+# Role loading depends on the Codex client version and project trust settings.
+[agents.ecc_reviewer]
+description = "Review Converter MCE changes for concrete bugs, regressions and missing tests."
+config_file = "agents/reviewer.toml"
+
+[agents.ecc_security]
+description = "Review conversion boundaries, archive names, limits, APIs and dependencies."
+config_file = "agents/security.toml"
+
+[agents.ecc_kotlin]
+description = "Review native Android conversion, coroutine cancellation and resource cleanup."
+config_file = "agents/kotlin.toml"

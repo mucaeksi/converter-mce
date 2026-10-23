@@ -577,6 +577,11 @@ footer {
 .file-list li { padding: 10px 0; font-size: 12px; overflow-wrap: anywhere; }
 .file-list li > span { display: inline-block; max-width: 100%; }
 .file-list small { display: block; color: var(--muted); margin-top: 5px; }
+.image-file-list { list-style: none; padding: 0; max-height: 300px; overflow-y: auto; }
+.image-file-list li { display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--line); }
+.image-file-list li > span { flex: 1; min-width: 0; }
+.image-file-list .button-icon { flex-shrink: 0; }
+.result-panel progress { width: min(100%, 280px); margin-top: 12px; accent-color: var(--green); }
 .button-icon { border: 1px solid var(--line); background: white; border-radius: 5px; padding: 5px 12px; margin: 5px 5px 0 0; }
 .text-input { width: 100%; border: 1px solid var(--line); padding: 10px; border-radius: 7px; color: var(--green); font-size: 12px; }
 .spaced-label { margin-top: 20px; }

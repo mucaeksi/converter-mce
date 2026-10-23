@@ -1,12 +1,12 @@
 import React, { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { imageHeader, MAX_INPUT_BYTES, type Job } from '../shared/conversion';
+import { imageHeader, type Job } from '../shared/conversion';
 import { deviceImageHeader, deviceOptions, deviceFormats, imageAccept, type DeviceFormat } from '../shared/device-image';
+import { imageOutputName, validateImageSelection, type ImageResult, type ImageProgress } from './image-tasks';
 import './style.css';
 const DocumentTools = lazy(() => import('./DocumentTools').then(module => ({ default: module.DocumentTools })));
 const MediaTools = lazy(() => import('./MediaTools').then(module => ({ default: module.MediaTools })));
 
-type Result = { blob: Blob; width: number; height: number };
 const sizes = (bytes: number) => bytes < 1024 * 1024 ? `${(bytes / 1024).toFixed(1)} KB` : `${(bytes / 1024 / 1024).toFixed(1)} MB`;
 const stateNames: Record<string, string> = { uploading: 'Yükleniyor', queued: 'Sırada', processing: 'Dönüştürülüyor', succeeded: 'Hazır', failed: 'Başarısız' };
 
@@ -19,9 +19,11 @@ async function responseJson<T>(response: Response): Promise<T> {
 
 function App() {
   const [tool, setTool] = useState<'image' | 'pdf' | 'table' | 'audio' | 'video'>('image');
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
+  const file = files[0] ?? null;
   const [preview, setPreview] = useState('');
-  const [result, setResult] = useState<Result | null>(null);
+  const [result, setResult] = useState<ImageResult | null>(null);
+  const [progress, setProgress] = useState<ImageProgress | null>(null);
   const [resultUrl, setResultUrl] = useState('');
   const [format, setFormat] = useState<DeviceFormat>('jpeg');
   const [quality, setQuality] = useState(85);
@@ -53,22 +55,37 @@ function App() {
     return () => URL.revokeObjectURL(url);
   }, [result]);
 
-  async function selectFile(selected?: File) {
-    if (!selected || busy) return;
+  async function selectFiles(selected: FileList | null) {
+    if (!selected?.length || busy) return;
     const version = ++selectionVersion.current;
-    setError(''); setResult(null); setJob(null); setFile(null);
+    setError(''); setResult(null); setJob(null); setFiles([]); setProgress(null);
     try {
-      if (selected.size > MAX_INPUT_BYTES) throw new Error('Dosya en fazla 10 MB olabilir.');
-      deviceImageHeader(new Uint8Array(await selected.arrayBuffer()));
+      const next = [...selected];
+      validateImageSelection(next);
+      if (mode === 'cloud' && next.length > 1) throw new Error('Toplu dönüşüm için cihazda işleme yöntemini seçin.');
+      for (const item of next) {
+        const buffer = await item.arrayBuffer();
+        if (version !== selectionVersion.current) return;
+        try { deviceImageHeader(new Uint8Array(buffer)); }
+        catch (error) { throw new Error(`${item.name}: ${(error as Error).message}`); }
+      }
       if (version !== selectionVersion.current) return;
-      setFile(selected); setStatus('Dosyanız hazır. Çıktı ayarlarını seçin.');
-    } catch (e) { if (version === selectionVersion.current) { setFile(null); setError((e as Error).message); } }
+      setFiles(next); setStatus(`${next.length > 1 ? `${next.length} dosyanız` : 'Dosyanız'} hazır. Çıktı ayarlarını seçin.`);
+    } catch (e) { if (version === selectionVersion.current) { setStatus('Dosya seçimini kontrol edin.'); setError((e as Error).message); } }
   }
-  function invalidate() { setResult(null); setError(''); }
+  function invalidate() { setResult(null); setError(''); setProgress(null); }
+  function removeFile(index: number) {
+    if (busy) return;
+    selectionVersion.current++;
+    const next = files.filter((_, i) => i !== index);
+    setFiles(next); invalidate(); setJob(null);
+    setStatus(next.length ? 'Dosya listesi güncellendi. Dönüşümü başlatabilirsiniz.' : 'Bir dosya seçerek başlayın.');
+    if (input.current) input.current.value = '';
+  }
 
   async function convert() {
     if (!file || busy) return;
-    setError(''); setResult(null); setJob(null); setBusy(true);
+    setError(''); setResult(null); setJob(null); setProgress(null); setBusy(true);
     const abort = new AbortController(); controller.current = abort;
     try {
       const params = new URLSearchParams({ format, quality: String(quality), width });
@@ -77,11 +94,24 @@ function App() {
         setStatus('Cihazınızda dönüştürülüyor…');
         const instance = new Worker(new URL('./image.worker.ts', import.meta.url), { type: 'module' });
         worker.current = instance;
-        const converted = await new Promise<Result>((resolve, reject) => {
-          instance.onmessage = ({ data }) => data.error ? reject(new Error(data.error)) : resolve(data);
-          instance.onerror = () => reject(new Error('Görüntü işçisi başlatılamadı.'));
-          abort.signal.addEventListener('abort', () => reject(new DOMException('İptal edildi', 'AbortError')), { once: true });
-          instance.postMessage({ file, options });
+        const converted = await new Promise<ImageResult>((resolve, reject) => {
+          let timer: ReturnType<typeof setTimeout>;
+          const cleanup = () => { clearTimeout(timer); abort.signal.removeEventListener('abort', cancel); instance.onmessage = null; instance.onerror = null; };
+          const fail = (error: Error) => { cleanup(); reject(error); };
+          const cancel = () => fail(new DOMException('İptal edildi', 'AbortError'));
+          const resetTimer = () => {
+            clearTimeout(timer);
+            timer = setTimeout(() => fail(new Error('Bir görüntünün işlenmesi 30 saniye sınırını aştı. Daha küçük bir dosya deneyin.')), 30_000);
+          };
+          instance.onmessage = ({ data }) => {
+            if (data.progress) {
+              setProgress(data.progress); setStatus(`${data.progress.completed}/${data.progress.total} görüntü hazır. ZIP arşivi oluşturuluyor…`); resetTimer();
+            } else { cleanup(); data.error ? reject(new Error(data.error)) : resolve(data); }
+          };
+          instance.onerror = () => fail(new Error('Görüntü işçisi başlatılamadı.'));
+          abort.signal.addEventListener('abort', cancel, { once: true });
+          resetTimer();
+          try { instance.postMessage({ files, options }); } catch (error) { fail(error as Error); }
         });
         setResult(converted); setStatus('Dönüşüm tamamlandı. Dosyanız cihazınızda kaldı.');
       } else {
@@ -111,12 +141,16 @@ function App() {
         if (current.state !== 'succeeded') throw new Error('Görüntü işlenemedi. Geçerli, animasyonsuz bir PNG veya JPEG deneyin.');
         const download = await fetch(`/api/jobs/${current.id}/download`, { signal: abort.signal });
         if (!download.ok) await responseJson(download);
-        setResult({ blob: await download.blob(), width: current.output_width!, height: current.output_height! });
+        setResult({ kind: 'image', name: imageOutputName(file.name, format), blob: await download.blob(), width: current.output_width!, height: current.output_height! });
         setStatus('Dönüşüm tamamlandı. Sunucu kopyaları 24 saat sonra erişime kapanır ve otomatik temizlenir.');
       }
     } catch (e) {
-      if ((e as Error).name === 'AbortError') setStatus('İşlem durduruldu. Varsa sunucu dosyasını aşağıdan silebilirsiniz.');
-      else setError(e instanceof TypeError ? 'Bağlantı kurulamadı. Sunucu oturumunuzu ve internet bağlantınızı kontrol edin.' : (e as Error).message);
+      setProgress(null);
+      if ((e as Error).name === 'AbortError') setStatus(mode === 'device' ? 'İşlem durduruldu. Kısmi çıktı oluşturulmadı; yeniden başlatabilirsiniz.' : 'İşlem durduruldu. Varsa sunucu dosyasını aşağıdan silebilirsiniz.');
+      else {
+        setStatus('İşlem tamamlanamadı. Ayarları kontrol edip yeniden deneyin.');
+        setError(e instanceof TypeError ? 'Bağlantı kurulamadı. Sunucu oturumunuzu ve internet bağlantınızı kontrol edin.' : (e as Error).message);
+      }
     } finally {
       worker.current?.terminate(); worker.current = null; controller.current = null; setBusy(false);
     }
@@ -149,13 +183,14 @@ function App() {
         <div className="workspace-grid">
           <section className="file-panel" aria-labelledby="file-title">
             <div className="panel-heading"><h2 id="file-title"><span className="step">01</span> Dosyanı ekle</h2><span className="muted">PNG · JPG · WebP · BMP · GIF</span></div>
-            <input ref={input} id="file-input" aria-label="Görüntü dosyası seç" type="file" accept={imageAccept} disabled={busy} onChange={(e) => void selectFile(e.target.files?.[0])} />
-            <div className={`dropzone ${dragging ? 'dragging' : ''} ${file ? 'has-file' : ''}`} onDragOver={(e) => { e.preventDefault(); setDragging(true); }} onDragLeave={() => setDragging(false)} onDrop={(e) => { e.preventDefault(); setDragging(false); void selectFile(e.dataTransfer.files[0]); }}>
+            <input ref={input} id="file-input" aria-label="Görüntü dosyası seç" aria-describedby="image-input-hint" type="file" accept={imageAccept} multiple={mode === 'device'} disabled={busy} onChange={(e) => void selectFiles(e.target.files)} />
+            <div className={`dropzone ${dragging ? 'dragging' : ''} ${file ? 'has-file' : ''}`} onDragOver={(e) => { e.preventDefault(); setDragging(true); }} onDragLeave={() => setDragging(false)} onDrop={(e) => { e.preventDefault(); setDragging(false); void selectFiles(e.dataTransfer.files); }}>
               {preview ? <img className="source-preview" src={preview} alt="Seçilen görüntünün önizlemesi" /> : <div className="upload-symbol">↑</div>}
-              <strong>{file ? file.name : 'Dosyanı buraya bırak'}</strong><p>{file ? sizes(file.size) : 'veya cihazından bir fotoğraf seç'}</p>
-              <button className="button-secondary" disabled={busy} onClick={() => input.current?.click()}>{file ? 'Dosyayı değiştir' : 'Dosya seç'} <span aria-hidden="true">→</span></button>
-              <small>En fazla 10 MB · 8 megapiksel</small>
+              <strong>{files.length > 1 ? `${files.length} görüntü seçildi` : file ? file.name : 'Dosyalarını buraya bırak'}</strong><p>{file ? sizes(files.reduce((size, item) => size + item.size, 0)) : 'veya cihazından fotoğraflar seç'}</p>
+              <button className="button-secondary" disabled={busy} onClick={() => input.current?.click()}>{file ? 'Dosyaları değiştir' : 'Dosya seç'} <span aria-hidden="true">→</span></button>
+              <small id="image-input-hint">Dosya başına 10 MB · 8 megapiksel<br />En fazla 20 dosya · Toplam 30 MB</small>
             </div>
+            {files.length > 1 && <ul className="file-list image-file-list" aria-label="Seçilen görüntüler">{files.map((item, index) => <li key={index}><span>{item.name}<small>{sizes(item.size)}</small></span><button className="button-icon" aria-label={`${index + 1}. görüntüyü kaldır`} disabled={busy} onClick={() => removeFile(index)}>Kaldır</button></li>)}</ul>}
             <div className="privacy-strip"><span>◇</span><p>{mode === 'device' ? 'Bu dosya cihazında işlenecek. Yükleme yapılmaz.' : 'Sunucu kopyaları 24 saat saklanır ve otomatik temizlenir.'}</p></div>
           </section>
           <section className="settings-panel" aria-labelledby="settings-title">
@@ -168,7 +203,8 @@ function App() {
               <div className="range-labels"><span>Daha küçük dosya</span><span>Daha yüksek kalite</span></div>
               <label className="field-label" htmlFor="width">En fazla genişlik <span className="optional">isteğe bağlı</span></label><div className="width-field"><input id="width" type="number" min="1" max="4096" placeholder="Orijinal boyut" value={width} onChange={(e) => { setWidth(e.target.value); invalidate(); }} /><span>px</span></div>
               <p className="field-hint">En-boy oranı korunur. Küçük görseller büyütülmez.</p>
-              {serverAuth !== 'unconfigured' ? <><label className="field-label" htmlFor="mode">İşleme yöntemi</label><select id="mode" value={mode} onChange={(e) => { setMode(e.target.value as 'device' | 'cloud'); invalidate(); }}><option value="device">Cihazımda · özel ve hızlı</option><option value="cloud">Sunucuda · 5 ücretsiz iş / gün</option></select></> : <p className="field-hint">Ücretsiz sürümde dosyalarınız cihazınızda dönüştürülür.</p>}
+              {serverAuth !== 'unconfigured' ? <><label className="field-label" htmlFor="mode">İşleme yöntemi</label><select id="mode" value={mode} onChange={(e) => { setMode(e.target.value as 'device' | 'cloud'); invalidate(); }}><option value="device">Cihazımda · özel ve hızlı</option><option value="cloud" disabled={files.length > 1}>Sunucuda · 5 ücretsiz iş / gün</option></select></> : <p className="field-hint">Ücretsiz sürümde dosyalarınız cihazınızda dönüştürülür.</p>}
+              <p className="field-hint">Birden fazla görüntü aynı ayarlarla sırayla işlenir ve tek ZIP olarak indirilir. ZIP sınırı 50 MB; gerekirse genişliği azaltın.</p>
               {mode === 'cloud' && serverAuth === 'access' && <a className="text-button" href="/api/login">Sunucu için güvenli oturum aç →</a>}
               <p className="field-hint">{format === 'jpeg' || format === 'bmp' ? 'JPG ve BMP saydamlığı desteklemez; arka plan beyaz olur.' : format === 'ico' ? 'ICO tek görüntü içerir; en fazla 256×256 piksel. Saydamlık korunur.' : 'Dönüşümde EXIF ve diğer kaynak metadata kaldırılır.'} Animasyonlu GIF/WebP desteklenmez.</p>
             </fieldset>
@@ -177,9 +213,10 @@ function App() {
           </section>
         </div>
         <section className="result-panel" aria-labelledby="result-title"><div><span className="eyebrow">SONUÇ</span><h2 id="result-title">{result ? 'Yeni dosyan hazır.' : 'Bir sonraki biçimi burada.'}</h2><p role="status" aria-live="polite">{status}</p>{error && <p role="alert" className="error">{error}</p>}
-          {result && <p className="result-meta">{sizes(result.blob.size)} · {result.width} × {result.height} px · {format.toUpperCase()}</p>}
+          {progress && busy && <progress aria-label="Toplu dönüşüm ilerlemesi" max={progress.total} value={progress.completed}>{progress.completed}/{progress.total}</progress>}
+          {result && <p className="result-meta">{sizes(result.blob.size)} · {result.kind === 'archive' ? `${result.count} dosya · ZIP` : `${result.width} × ${result.height} px · ${format.toUpperCase()}`}</p>}
           {job && !busy && <button className="text-button" onClick={() => void removeServerCopy()}>Sunucu kopyalarını şimdi sil</button>}</div>
-          {resultUrl ? <div className="result-actions"><img src={resultUrl} alt="Dönüştürülmüş görüntünün önizlemesi" /><a className="button-primary" href={resultUrl} download={`${file?.name.replace(/\.[^.]+$/, '') ?? 'converter'}.${format === 'jpeg' ? 'jpg' : format}`}>Dosyayı indir <span>↓</span></a></div> : <div className="result-placeholder" aria-hidden="true">→</div>}
+          {resultUrl && result ? <div className="result-actions">{result.kind === 'image' && <img src={resultUrl} alt="Dönüştürülmüş görüntünün önizlemesi" />}<a className="button-primary" href={resultUrl} download={result.name}>{result.kind === 'archive' ? 'ZIP dosyasını indir' : 'Dosyayı indir'} <span aria-hidden="true">↓</span></a></div> : <div className="result-placeholder" aria-hidden="true">→</div>}
         </section>
         </>}
         </Suspense>

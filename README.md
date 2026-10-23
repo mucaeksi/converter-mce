@@ -8,6 +8,7 @@ Etkin olmayan sunucu işleme taslağı ayrıca depoda korunur.
 
 - Web: PNG/JPEG/WebP/BMP ve tek kareli GIF girişinden JPEG, PNG, WebP, BMP veya ICO; kalite ve en fazla genişlik seçimi.
 - Webde cihaz içi dönüşüm: arka plan işçisinde çalışır, dosya yüklemez.
+- Web toplu görüntü: en fazla 20 dosyayı aynı ayarlarla sırayla dönüştürür; ilerleme/iptal ve tek ZIP indirme. Toplam giriş 30 MB, ZIP 50 MB.
 - Web PDF: birleştirme, sayfa çıkarma/sıralama, döndürme ve görselden PDF; en fazla 200 çıktı sayfası.
 - Web veri: CSV/TSV/JSON/JSONL/NDJSON/XLSX girişleri; bu biçimlere ve HTML/Markdown tablo çıktısına dönüşüm; Excel sayfa seçimi.
 - Web ses: tarayıcının çözebildiği dosyadan WAV veya MP3; kesme, örnekleme ve ses seviyesi.
@@ -22,7 +23,7 @@ Etkin olmayan sunucu işleme taslağı ayrıca depoda korunur.
   JPEG için beyaz, PNG/WebP için saydamlık koruyan arka plan ve sistem dosya seçiciyle kaydetme. Android 9 / API 28+.
 - Android görsel→PDF: 1–8 görsel, sayfa sıralama/kaldırma, otomatik dikey/yatay A4, genişlik ayarı, iptal ve yerel PDF kaydetme.
 
-Tam Office→PDF, OCR, uzun/büyük medya, toplu işler, reklam SDK'sı ve Android'in
+Tam Office→PDF, OCR, uzun/büyük medya, sunucuda toplu işler, reklam SDK'sı ve Android'in
 ileri belge/medya araçları sonraki aşamalardır. Tüm format çiftlerinin desteklendiği
 iddia edilmez. Veri dönüşümü biçimlendirmeyi korumaz ve formüllü Excel'i reddeder.
 PDF formları/imza alanları reddedilir. Codec ve kalite sınırlamaları arayüzde yazılıdır.
@@ -156,6 +157,7 @@ panelden çıkış/iptal bunu temizler. CSV→JSON akışının JS boyutu yakla�
 - [Cloudflare kararları](docs/CLOUDFLARE.tr.md)
 - [Skill kaynakları ve hash kayıtları](docs/skills-manifest.json)
 - [Seçilen ECC skill'leri ve kullanım kuralları](docs/ECC.tr.md)
+- [Toplu görüntü dönüşümü ve sınırları](docs/BATCH-IMAGES.tr.md)
 - [Resmi Workers sınırları](https://developers.cloudflare.com/workers/platform/limits/)
 - [Resmi Containers başlangıcı](https://developers.cloudflare.com/containers/get-started/)
 
@@ -164,6 +166,8 @@ bulunur. Graphify CLI, global hook'lar veya harici model analizi etkinleştirilm
 ECC'den projeye uygun altı skill ayrıca eklendi: React/performans, erişilebilirlik,
 Playwright, Kotlin coroutines, güvenlik ve doğrulama. Sonraki geliştirmelerde
 hangi skill'in okunup uygulanacağı kök [AGENTS.md](AGENTS.md) içinde tanımlıdır.
+Kod, güvenlik ve Kotlin incelemesi için üç ECC kaynak rolü ve projeye özel
+Codex adaptörleri de `.codex/config.toml` altında tanımlıdır.
 
 Üçüncü taraf bağımlılık bildirimleri: [THIRD-PARTY-NOTICES.txt](public/THIRD-PARTY-NOTICES.txt).
 Bu dosya sabit lockfile sürümlerinin dağıtılan lisans metinlerini içerir.

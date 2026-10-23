@@ -31,9 +31,20 @@ architecture and higher-priority instructions. Examples mentioning Next.js,
 Supabase, Express, blockchain, GitHub Actions, other skill names or packages do
 not require installing them. Related-skills lists are optional reading, not
 missing dependencies. Keep existing patterns and dependencies unless the task
-justifies a change. Do not install ECC agents, hooks, services, global config or
-run its installer as part of ordinary development. Delegate only when the user
+justifies a change. The selected read-only Codex roles are listed below; do not
+install additional agents, hooks, services, global config or run the ECC installer
+as part of ordinary development. Delegate only when the user
 or another applicable instruction explicitly requests it.
+
+The project `.codex/config.toml` defines `ecc_reviewer`, `ecc_security` and
+`ecc_kotlin` for Codex clients that support trusted project roles. Their source
+references are in `.agents/roles/ecc/`; the adapters inherit the session's model.
+Use the code-reviewer's checklist for code changes, the security-reviewer's for
+untrusted conversion boundaries, and the Kotlin-reviewer's for Android changes.
+These checklists can be applied in the current agent. A saved role definition
+does not establish that a separate agent was started: report actual delegation
+and runtime availability accurately. Role instructions and sample severities
+must be interpreted using project conventions and concrete failure scenarios.
 
 Use project commands below instead of copying ECC's example commands. There is
 no web `lint` script or coverage gate; do not add either just to match a sample.

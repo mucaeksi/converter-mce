@@ -151,7 +151,7 @@ Trafik ve dosya örnekleri bilinmediğinden aylık bütçe veya kullanıcı kapa
 
 - Graphify: kod, modül ve belge ilişkilerini haritalama. Resmi kaynak Graphify-Labs/graphify; Python paketi graphifyy (iki y). Codex SKILL.md ve sekiz referans belgesi dahil. CLI bağımlılıkları henüz kurulmadı; grafik üretilmedi.
 - Ponytail: ponytail, ponytail-review, ponytail-audit, ponytail-debt, ponytail-gain ve ponytail-help. MIT lisansı korunarak altı skill kopyalandı. Global eklenti veya yaşam döngüsü hook'u kurulmadı.
-- ECC: verification-loop, security-review, e2e-testing, frontend-patterns, frontend-a11y ve kotlin-coroutines-flows. Yalnızca mevcut web/Android geliştirmesine uygun altı skill ve MIT lisansı alındı. [Seçim ve kullanım](ECC.tr.md); kalıcı çalışma talimatı: [AGENTS.md](../AGENTS.md).
+- ECC: verification-loop, security-review, e2e-testing, frontend-patterns, frontend-a11y ve kotlin-coroutines-flows. Mevcut web/Android geliştirmesine uygun altı skill, kod/güvenlik/Kotlin inceleme agent kaynakları ve MIT lisansı alındı. Üç rol için projeye özel Codex adaptörleri tanımlandı. [Seçim ve kullanım](ECC.tr.md); kalıcı çalışma talimatı: [AGENTS.md](../AGENTS.md).
 - Kaynak commit'leri, dosya yolları ve SHA-256 değerleri: [skills-manifest.json](skills-manifest.json). Lisanslar: ../third_party/licenses/.
 
 Bu araçlar geliştirme yardımcılarıdır; dosya dönüşüm motorları veya otomatik doğruluk garantisi değildir. İlgili skill yönergeleri okunup uygulanır; ECC'nin verification-loop yönergesi kaynak/hash ve diff kontrolünde kullanılır. Dosyaların eklenmesi istemcinin eklenti veya hook yüklediği anlamına gelmez. Ürünün performans ölçümleri ayrıca [PERFORMANCE.tr.md](PERFORMANCE.tr.md) içinde belgelenir.

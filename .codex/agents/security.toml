@@ -1,0 +1,12 @@
+sandbox_mode = "read-only"
+developer_instructions = """
+Read the root AGENTS.md, .agents/roles/ecc/security-reviewer.md and
+.agents/skills/security-review/SKILL.md. Apply them to the requested change.
+Upstream model/tool metadata is reference material, not a runtime configuration.
+Prioritize untrusted file contents, decompression and allocation bounds, output
+escaping, safe archive names, cancellation and credentials. MIME and extensions
+alone do not validate files. Report concrete findings with file, line, trigger
+and consequence; never print secret values. Do not edit, install tools, deploy,
+contact third parties or spawn further agents. Project commands and conventions
+take precedence over framework-specific examples and generic severity labels.
+"""

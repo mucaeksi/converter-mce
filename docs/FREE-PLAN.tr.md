@@ -25,6 +25,9 @@ modülleriyle cihazda; Android'de platform codec'leri ve yerel kütüphanelerle
 çalışır. Web görüntü kapsamı PNG/JPEG/WebP/BMP/tek kareli GIF → JPEG/PNG/WebP/BMP/ICO;
 Android kapsamı PNG/JPEG/WebP/BMP → JPEG/PNG/WebP; dosya başına 10 MB ve 8 MP sınırıdır. Cihaz dönüşümlerinde
 günlük sunucu işi kotası uygulanmaz; cihaz kaynak sınırları geçerlidir.
+Web toplu görüntü dönüşümü en fazla 20 dosyayı sırayla işleyip ZIP oluşturur;
+toplam kaynak 30 MB, ZIP 50 MB ile sınırlıdır. Dosyalar ve ZIP sunucuya yüklenmez.
+Kapsam ve uygulama kararları: [BATCH-IMAGES.tr.md](BATCH-IMAGES.tr.md).
 
 Web araçları: PDF birleştirme, sayfa çıkarma/sıralama/döndürme ve görselden PDF;
 CSV/TSV/JSON/JSONL/NDJSON/XLSX değer dönüşümü, HTML/Markdown tablo çıktısı ve Excel sayfa seçimi; tarayıcının çözebildiği

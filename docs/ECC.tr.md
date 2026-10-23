@@ -1,9 +1,9 @@
 # Converter MCE için seçilen ECC yönergeleri
 
 [ECC](https://github.com/affaan-m/ECC) içinden mevcut React/TypeScript web ve
-Kotlin/Compose Android uygulamasına uygun altı skill alındı. Kaynak sürümü
+Kotlin/Compose Android uygulamasına uygun altı skill ve üç agent rolü alındı. Kaynak sürümü
 [`90606c8315ee09cafc303515c5f33024db6b9882`](https://github.com/affaan-m/ECC/tree/90606c8315ee09cafc303515c5f33024db6b9882),
-inceleme tarihi 23 Ekim 2026. Her `SKILL.md` kaynakla byte düzeyinde aynıdır;
+inceleme tarihi 23 Ekim 2026. Skill ve agent kaynak dosyaları byte düzeyinde aynıdır;
 MIT lisansı [third_party/licenses/ecc/LICENSE](../third_party/licenses/ecc/LICENSE)
 altında korunur. Dosya bazında kaynak yolları ve SHA-256 değerleri
 [skills-manifest.json](skills-manifest.json) içindedir.
@@ -35,10 +35,32 @@ doğrulanır. Örnek güvenlik aramaları sır değerlerini çıktıya yazacak �
 kopyalanmaz. Playwright örnekleri mevcut sürümün API'sine ve olayı tetiklemeden
 önce bekleyici kaydetme gereğine göre değerlendirilir.
 
-ECC'nin installer'ı, agent tanımları, hook'ları, MCP ayarları, hosted servisi ve
+ECC'nin installer'ı, hook'ları, MCP ayarları, hosted servisi ve
 otomatik öğrenme/global bellek sistemi alınmadı. Mevcut üründe kullanılmayan
 backend, veritabanı, LLM ve diğer platform skill'leri eklenmedi. Uygulama çalışma
 zamanına bağımlılık veya yeni servis maliyeti eklenmez.
+
+## Seçilen agent rolleri
+
+| Codex rolü | ECC kaynak tanımı | Amaç |
+| --- | --- | --- |
+| `ecc_reviewer` | [code-reviewer](../.agents/roles/ecc/code-reviewer.md) | Somut hata, davranış değişikliği ve eksik test incelemesi |
+| `ecc_security` | [security-reviewer](../.agents/roles/ecc/security-reviewer.md) | Güvenilmeyen dosyalar, sınırlar, ZIP adları, API ve sır güvenliği |
+| `ecc_kotlin` | [kotlin-reviewer](../.agents/roles/ecc/kotlin-reviewer.md) | Android yaşam döngüsü, Compose, iptal ve kaynak temizliği |
+
+[.codex/config.toml](../.codex/config.toml) bu rolleri, projeye özel
+[TOML adaptörlerine](../.codex/agents/reviewer.toml) bağlar. Adaptörler salt okunur
+inceleme ister; model/sağlayıcı seçimini oturumdan devralır. Kaynaklardaki
+Claude `model`/`tools` alanları Codex'e kopyalanmaz. Framework örnekleri, genel
+önem seviyeleri ve mimari öneriler mevcut ürüne göre değerlendirilir.
+
+Config ve üç adaptör, OpenAI'ın
+[güncel config şeması](https://developers.openai.com/codex/config-schema.json)
+ile doğrulandı. Rol yükleme, istemci sürümüne ve proje güven ayarlarına bağlıdır;
+mevcut oturumda yeni rollerin otomatik yüklendiği veya ayrı bir agent başlatıldığı
+iddia edilmez. Ayrı agent çalıştırılmadığında ilgili kontrol listeleri mevcut
+agent tarafından uygulanır. Bu turda toplu görüntü dönüşümü kod/güvenlik kontrol
+listeleriyle incelendi; Kotlin uygulaması değişmedi.
 
 ## Kaynak doğrulaması ve güncelleme
 
