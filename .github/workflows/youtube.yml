@@ -1,0 +1,65 @@
+name: YouTube
+
+on:
+  workflow_dispatch:
+    inputs:
+      islem:
+        description: "yedek: kanalı yedekle · onizle: planı göster · uygula: planı kanala gönder"
+        type: choice
+        options: [yedek, onizle, uygula]
+        required: true
+      plan:
+        description: "onizle/uygula için plan dosyası, ör. planlar/01-basliklar.json"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+concurrency:
+  group: youtube
+  cancel-in-progress: false
+
+jobs:
+  calistir:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Repo gizli olmalı
+        if: ${{ !github.event.repository.private }}
+        run: |
+          echo "::error::Repo herkese açık. Kanal verisi (gizli ve liste dışı videolar dahil) buraya yazılamaz. Settings → General → Change visibility → Private yapın."
+          exit 1
+
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Çalıştır
+        env:
+          YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
+          YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
+          YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
+          ISLEM: ${{ inputs.islem }}
+          PLAN: ${{ inputs.plan }}
+        run: |
+          case "$ISLEM" in
+            yedek)  python scripts/yt.py yedek ;;
+            onizle) python scripts/yt.py uygula "$PLAN" ;;
+            uygula) python scripts/yt.py yedek && python scripts/yt.py uygula "$PLAN" --gercekten ;;
+          esac
+
+      - name: Sonuçları kaydet
+        if: ${{ always() && inputs.islem != 'onizle' }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data
+          if git diff --cached --quiet; then
+            echo "Kaydedilecek değişiklik yok."
+          else
+            git commit -m "Kanal verisi: ${{ inputs.islem }}"
+            git push origin "HEAD:${GITHUB_REF}"
+          fi

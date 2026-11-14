@@ -1,6 +1,0 @@
-*
-!engine/
-!engine/server.py
-!engine/requirements.txt
-!engine/vendor/
-!engine/vendor/*.whl
